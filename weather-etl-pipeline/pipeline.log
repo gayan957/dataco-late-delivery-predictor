@@ -1,0 +1,11 @@
+2026-06-17 14:01:08,408 [INFO] pipeline: === Pipeline starting ===
+2026-06-17 14:01:09,306 [INFO] extractor: Fetched data for Colombo — 24 records
+2026-06-17 14:01:10,348 [INFO] extractor: Fetched data for London — 24 records
+2026-06-17 14:01:11,145 [INFO] extractor: Fetched data for Tokyo — 24 records
+2026-06-17 14:01:11,147 [INFO] pipeline: Extracted data for 3 cities
+2026-06-17 14:01:11,171 [INFO] transformer: Transformed 24 rows for Colombo
+2026-06-17 14:01:11,175 [INFO] transformer: Transformed 24 rows for London
+2026-06-17 14:01:11,177 [INFO] transformer: Transformed 24 rows for Tokyo
+2026-06-17 14:01:11,179 [INFO] pipeline: Total rows after transform: 72
+2026-06-17 14:01:11,497 [INFO] loader: Loaded 72 rows into PostgreSQL
+2026-06-17 14:01:11,499 [INFO] pipeline: === Pipeline finished ===
