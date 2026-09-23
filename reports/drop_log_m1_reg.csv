@@ -1,0 +1,26 @@
+column,reason
+Late_delivery_risk,Leakage: defined as real days > scheduled days
+Delivery Status,Leakage: text version of real vs scheduled days
+shipping date (DateOrders),Leakage: order date + real shipping days
+Order Status,Leakage: recorded after fulfilment (used only to filter)
+Days for shipment (scheduled),Redundant: fully determined by Shipping Mode
+Customer Email,"Masked (all 'XXXXXXXXX'), no information"
+Customer Password,"Masked (all 'XXXXXXXXX'), no information"
+Customer Fname,"Personal data (PII), no predictive meaning"
+Customer Lname,"Personal data (PII), no predictive meaning"
+Customer Street,"Personal data (PII), no predictive meaning"
+Customer Zipcode,"Personal data (PII), no predictive meaning"
+Order Zipcode,86.3% missing
+Product Description,100.0% missing
+Product Status,Constant: a single value in every row
+Product Image,"Image URL: one per product, duplicates Product Name"
+Order Profit Per Order,Exact duplicate of 'Benefit per order'
+Order Item Total,Exact duplicate of 'Sales per customer'
+Product Category Id,Exact duplicate of 'Category Id'
+Order Customer Id,Exact duplicate of 'Customer Id'
+Order Item Cardprod Id,Exact duplicate of 'Product Card Id'
+Order Item Product Price,Exact duplicate of 'Product Price'
+Department Id,1-to-1 with 'Department Name' (same information as a code)
+Product Card Id,1-to-1 with 'Product Name' (same information as a code)
+Order Item Id,Row identifier
+Customer Id,Identifier: would let the model memorise customers

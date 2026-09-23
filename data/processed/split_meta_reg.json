@@ -1,0 +1,167 @@
+{
+  "task": "regression",
+  "target": "Days for shipping (real)",
+  "group": "Order Id",
+  "seed": 42,
+  "split": "StratifiedGroupKFold(n_splits=5) on the target, fold 0 = test",
+  "excluded_order_status": [
+    "CANCELED",
+    "SUSPECTED_FRAUD"
+  ],
+  "dropped_columns": [
+    {
+      "column": "Late_delivery_risk",
+      "reason": "Leakage: defined as real days > scheduled days"
+    },
+    {
+      "column": "Delivery Status",
+      "reason": "Leakage: text version of real vs scheduled days"
+    },
+    {
+      "column": "shipping date (DateOrders)",
+      "reason": "Leakage: order date + real shipping days"
+    },
+    {
+      "column": "Order Status",
+      "reason": "Leakage: recorded after fulfilment (used only to filter)"
+    },
+    {
+      "column": "Days for shipment (scheduled)",
+      "reason": "Redundant: fully determined by Shipping Mode"
+    },
+    {
+      "column": "Customer Email",
+      "reason": "Masked (all 'XXXXXXXXX'), no information"
+    },
+    {
+      "column": "Customer Password",
+      "reason": "Masked (all 'XXXXXXXXX'), no information"
+    },
+    {
+      "column": "Customer Fname",
+      "reason": "Personal data (PII), no predictive meaning"
+    },
+    {
+      "column": "Customer Lname",
+      "reason": "Personal data (PII), no predictive meaning"
+    },
+    {
+      "column": "Customer Street",
+      "reason": "Personal data (PII), no predictive meaning"
+    },
+    {
+      "column": "Customer Zipcode",
+      "reason": "Personal data (PII), no predictive meaning"
+    },
+    {
+      "column": "Order Zipcode",
+      "reason": "86.3% missing"
+    },
+    {
+      "column": "Product Description",
+      "reason": "100.0% missing"
+    },
+    {
+      "column": "Product Status",
+      "reason": "Constant: a single value in every row"
+    },
+    {
+      "column": "Product Image",
+      "reason": "Image URL: one per product, duplicates Product Name"
+    },
+    {
+      "column": "Order Profit Per Order",
+      "reason": "Exact duplicate of 'Benefit per order'"
+    },
+    {
+      "column": "Order Item Total",
+      "reason": "Exact duplicate of 'Sales per customer'"
+    },
+    {
+      "column": "Product Category Id",
+      "reason": "Exact duplicate of 'Category Id'"
+    },
+    {
+      "column": "Order Customer Id",
+      "reason": "Exact duplicate of 'Customer Id'"
+    },
+    {
+      "column": "Order Item Cardprod Id",
+      "reason": "Exact duplicate of 'Product Card Id'"
+    },
+    {
+      "column": "Order Item Product Price",
+      "reason": "Exact duplicate of 'Product Price'"
+    },
+    {
+      "column": "Department Id",
+      "reason": "1-to-1 with 'Department Name' (same information as a code)"
+    },
+    {
+      "column": "Product Card Id",
+      "reason": "1-to-1 with 'Product Name' (same information as a code)"
+    },
+    {
+      "column": "Order Item Id",
+      "reason": "Row identifier"
+    },
+    {
+      "column": "Customer Id",
+      "reason": "Identifier: would let the model memorise customers"
+    }
+  ],
+  "feature_columns": [
+    "Type",
+    "Benefit per order",
+    "Sales per customer",
+    "Category Id",
+    "Category Name",
+    "Customer City",
+    "Customer Country",
+    "Customer Segment",
+    "Customer State",
+    "Department Name",
+    "Latitude",
+    "Longitude",
+    "Market",
+    "Order City",
+    "Order Country",
+    "order date (DateOrders)",
+    "Order Item Discount",
+    "Order Item Discount Rate",
+    "Order Item Profit Ratio",
+    "Order Item Quantity",
+    "Sales",
+    "Order Region",
+    "Order State",
+    "Product Name",
+    "Product Price",
+    "Shipping Mode"
+  ],
+  "summary": [
+    {
+      "set": "full",
+      "rows": 172765,
+      "orders": 62897,
+      "share_of_rows_%": 100.0,
+      "mean_days": 3.499,
+      "std_days": 1.623
+    },
+    {
+      "set": "train",
+      "rows": 138098,
+      "orders": 50318,
+      "share_of_rows_%": 79.9,
+      "mean_days": 3.5,
+      "std_days": 1.626
+    },
+    {
+      "set": "test",
+      "rows": 34667,
+      "orders": 12579,
+      "share_of_rows_%": 20.1,
+      "mean_days": 3.494,
+      "std_days": 1.614
+    }
+  ]
+}
