@@ -1,122 +1,109 @@
 # Owner: M2
-"""
-Feature engineering: date decomposition, geo-derived features,
-and order-level aggregates.
+"""M2 - feature engineering as scikit-learn transformers (regression task).
 
-Call build_features(df) to apply all transformations in sequence.
-New column names added here should also be registered in src/config.py
-(NUMERIC or CATEGORICAL_LOW) so the ColumnTransformer picks them up.
+These classes live in a .py file (not in a notebook) so the trained pipeline can be
+pickled and loaded again by the backend: pickle stores a reference to the class,
+and that reference must be importable.
+
+All features use only information available when the order is placed.
+None of them look at the target, so they cannot leak it.
+
+Usage inside the shared ColumnTransformer:
+    ("date",  Pipeline([("feats", DateFeatures()), ("impute", SimpleImputer(strategy="most_frequent"))]), [DATE_COL]),
+    ("order", OrderFeatures(), ["Order Id", "Sales", "Product Name"]),
+    ("geo",   GeoFeatures(),   ["Customer Country", "Order Country"]),
 """
 from __future__ import annotations
 
-import pandas as pd
 import numpy as np
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+
+DATE_COL = "order date (DateOrders)"
+DATE_FMT = "%m/%d/%Y %H:%M"
+
+# 'Customer Country' (where the customer lives) and 'Order Country' (where the order is
+# shipped) are spelled differently in the raw data, so map one spelling onto the other
+# before comparing them.
+CUSTOMER_TO_ORDER_COUNTRY = {"EE. UU.": "Estados Unidos", "Puerto Rico": "Puerto Rico"}
 
 
-def add_date_features(
-    df: pd.DataFrame,
-    date_col: str = "order date (DateOrders)",
-) -> pd.DataFrame:
-    """
-    Extract temporal signals from the order date.
+class DateFeatures(BaseEstimator, TransformerMixin):
+    """Calendar features from the order timestamp."""
 
-    Adds columns:
-        order_month       (1–12)
-        order_dayofweek   (0=Mon … 6=Sun)
-        order_quarter     (1–4)
-        is_weekend        (0/1 — Sat/Sun orders may behave differently)
+    names = ["order_weekday", "order_month", "order_hour", "order_quarter", "is_weekend"]
 
-    Parameters
-    ----------
-    df       : DataFrame containing date_col
-    date_col : name of the datetime column
+    def __init__(self, date_col=DATE_COL, date_format=DATE_FMT):
+        self.date_col = date_col
+        self.date_format = date_format
 
-    Returns
-    -------
-    pd.DataFrame  with new columns appended (original column kept)
-    """
-    # TODO M2:
-    #   df = df.copy()
-    #   dt = pd.to_datetime(df[date_col], errors="coerce")
-    #   df["order_month"]     = dt.dt.month
-    #   df["order_dayofweek"] = dt.dt.dayofweek
-    #   df["order_quarter"]   = dt.dt.quarter
-    #   df["is_weekend"]      = dt.dt.dayofweek.isin([5, 6]).astype(int)
-    #   return df
-    raise NotImplementedError("TODO M2 — parse date and extract temporal features")
+    def fit(self, X, y=None):
+        return self  # nothing to learn
+
+    def transform(self, X):
+        d = pd.to_datetime(X[self.date_col], format=self.date_format, errors="coerce")
+        return pd.DataFrame(
+            {
+                "order_weekday": d.dt.weekday,  # 0 = Monday
+                "order_month": d.dt.month,
+                "order_hour": d.dt.hour,
+                "order_quarter": d.dt.quarter,
+                "is_weekend": (d.dt.weekday >= 5).astype(int),
+            },
+            index=X.index,
+        )
+
+    def get_feature_names_out(self, input_features=None):
+        return np.array(self.names)
 
 
-def add_geo_features(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Engineer location-derived features from Latitude/Longitude.
+class OrderFeatures(BaseEstimator, TransformerMixin):
+    """Size of the order, computed from the rows (items) of the same order only."""
 
-    Suggested additions:
-        lat_bin   — discretised latitude band (e.g. 10° bins)
-        lon_bin   — discretised longitude band
-        dist_to_equator — abs(Latitude)
+    names = ["order_items", "order_total_sales", "order_n_products"]
 
-    Parameters
-    ----------
-    df : DataFrame with 'Latitude' and 'Longitude' columns
+    def __init__(self, group_col="Order Id", sales_col="Sales", product_col="Product Name"):
+        self.group_col = group_col
+        self.sales_col = sales_col
+        self.product_col = product_col
 
-    Returns
-    -------
-    pd.DataFrame  with new columns appended
-    """
-    # TODO M2:
-    #   df = df.copy()
-    #   df["dist_to_equator"] = df["Latitude"].abs()
-    #   df["lat_bin"] = pd.cut(df["Latitude"], bins=18, labels=False)
-    #   df["lon_bin"] = pd.cut(df["Longitude"], bins=36, labels=False)
-    #   return df
-    raise NotImplementedError("TODO M2 — add geo-derived features from Lat/Lon")
+    def fit(self, X, y=None):
+        return self
 
+    def transform(self, X):
+        g = X.groupby(self.group_col)
+        return pd.DataFrame(
+            {
+                "order_items": g[self.group_col].transform("size"),
+                "order_total_sales": g[self.sales_col].transform("sum"),
+                "order_n_products": g[self.product_col].transform("nunique"),
+            },
+            index=X.index,
+        )
 
-def add_order_features(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Compute order-level aggregates and item-level derived ratios.
-
-    Suggested additions:
-        items_per_order       — count of line items sharing the same Order Id
-        discount_to_price     — Order Item Discount / Order Item Product Price
-        effective_price       — Order Item Product Price * (1 - Order Item Discount Rate)
-
-    Parameters
-    ----------
-    df : cleaned DataFrame (with 'Order Id', price, discount columns)
-
-    Returns
-    -------
-    pd.DataFrame  with new columns appended
-    """
-    # TODO M2:
-    #   df = df.copy()
-    #   items_count = df.groupby("Order Id")["Order Id"].transform("count")
-    #   df["items_per_order"] = items_count
-    #   denom = df["Order Item Product Price"].replace(0, np.nan)
-    #   df["discount_to_price"] = df["Order Item Discount"] / denom
-    #   df["effective_price"]   = df["Order Item Product Price"] * (1 - df["Order Item Discount Rate"])
-    #   return df
-    raise NotImplementedError("TODO M2 — add order-level aggregate features")
+    def get_feature_names_out(self, input_features=None):
+        return np.array(self.names)
 
 
-def build_features(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Apply all feature engineering transformations in sequence.
+class GeoFeatures(BaseEstimator, TransformerMixin):
+    """is_domestic = 1 when the order is shipped to the customer's own country."""
 
-    Parameters
-    ----------
-    df : cleaned DataFrame (output of data_prep.clean())
+    names = ["is_domestic"]
 
-    Returns
-    -------
-    pd.DataFrame  fully feature-engineered, ready for make_split()
-    """
-    # TODO M2:
-    #   df = add_date_features(df)
-    #   df = add_geo_features(df)
-    #   df = add_order_features(df)
-    #   return df
-    raise NotImplementedError(
-        "TODO M2 — chain add_date_features → add_geo_features → add_order_features"
-    )
+    def __init__(self, customer_country_col="Customer Country", order_country_col="Order Country"):
+        self.customer_country_col = customer_country_col
+        self.order_country_col = order_country_col
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        cust = X[self.customer_country_col]
+        cust = cust.map(CUSTOMER_TO_ORDER_COUNTRY).fillna(cust)
+        return pd.DataFrame(
+            {"is_domestic": (cust == X[self.order_country_col]).astype(int)},
+            index=X.index,
+        )
+
+    def get_feature_names_out(self, input_features=None):
+        return np.array(self.names)
