@@ -1,18 +1,3 @@
-# Owner: M2
-"""M2 - feature engineering as scikit-learn transformers (regression task).
-
-These classes live in a .py file (not in a notebook) so the trained pipeline can be
-pickled and loaded again by the backend: pickle stores a reference to the class,
-and that reference must be importable.
-
-All features use only information available when the order is placed.
-None of them look at the target, so they cannot leak it.
-
-Usage inside the shared ColumnTransformer:
-    ("date",  Pipeline([("feats", DateFeatures()), ("impute", SimpleImputer(strategy="most_frequent"))]), [DATE_COL]),
-    ("order", OrderFeatures(), ["Order Id", "Sales", "Product Name"]),
-    ("geo",   GeoFeatures(),   ["Customer Country", "Order Country"]),
-"""
 from __future__ import annotations
 
 import numpy as np
