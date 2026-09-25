@@ -1,0 +1,10 @@
+
+TARGET          mean 3.50 days, std 1.63, range 0-6
+SHIPPING MODE   eta^2 = 0.389  (share of variance explained by mode alone)
+TOP CATEGORICAL Shipping Mode (0.389), Order City (0.096), Order State (0.030)
+TOP NUMERIC     Longitude (-0.004), Order Item Discount Rate (+0.002), Benefit per order (-0.002)
+REDUNDANT PAIRS 1 numeric pairs with |r| > 0.9
+OUTLIERS        highest share: Benefit per order (10.4% of rows)
+NEGATIVE PROFIT 18.7% of rows (kept - genuine losses)
+MISSING         0 missing cells | DUPLICATE ROWS 0
+ENGINEERED      order_weekday, order_month, order_hour, order_quarter, is_weekend, order_items, order_total_sales, order_n_products, is_domestic
