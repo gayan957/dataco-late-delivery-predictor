@@ -12,6 +12,7 @@ Usage
 Prerequisites
 -------------
     python -m src.data_prep_local     # builds data/processed/local/ parquets
+    Run notebooks/03_encoding_selection_m3_regression.ipynb  # produces results/m3_selection.json
 
 Outputs
 -------
@@ -22,6 +23,7 @@ Outputs
 from __future__ import annotations
 
 import argparse
+import json
 import time
 import warnings
 from pathlib import Path
@@ -47,7 +49,7 @@ from src.config import (
     SCHEDULED_DAYS,
     TARGET,
 )
-from src.encoders import build_feature_pipeline
+from src.encoders import ENGINEERED, build_preprocessor
 
 
 # ---------------------------------------------------------------------------
@@ -69,10 +71,10 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--n-iter",   type=int, default=30,
                    help="RandomizedSearchCV iterations (--tune only)")
     p.add_argument(
-        "--high-card", choices=["target", "frequency"], default="target",
+        "--high-card", choices=["target", "frequency", "onehot_rare", "drop"], default="target",
         dest="high_card",
+        help="Fallback strategy when m3_selection.json is absent",
     )
-    p.add_argument("--scale-numeric", action="store_true")
     return p.parse_args()
 
 
@@ -81,14 +83,12 @@ def parse_args() -> argparse.Namespace:
 # ---------------------------------------------------------------------------
 
 def build_pipeline(
+    X_train: pd.DataFrame,
+    selected_features: list[str],
     high_card: str = "target",
-    scale_numeric: bool = False,
 ) -> Pipeline:
-    """Preprocessing (M2 feats → encoder) + XGBRegressor in one Pipeline."""
-    feature_enc = build_feature_pipeline(
-        scale_numeric=scale_numeric,
-        high_card_strategy=high_card,
-    )
+    """Preprocessor (from m3_selection.json) + XGBRegressor in one Pipeline."""
+    preprocessor = build_preprocessor(X_train, selected_features, high_card=high_card)
     clf = XGBRegressor(
         n_estimators=400,
         learning_rate=0.05,
@@ -103,8 +103,8 @@ def build_pipeline(
         verbosity=0,
     )
     return Pipeline([
-        ("feature_enc", feature_enc),
-        ("clf",         clf),
+        ("prep", preprocessor),
+        ("clf",  clf),
     ])
 
 
@@ -183,7 +183,7 @@ def derived_late_flag(
 
 def top_features(pipeline: Pipeline, n: int = 15) -> pd.Series:
     try:
-        ct           = pipeline.named_steps["feature_enc"].named_steps["encoder"]
+        ct           = pipeline.named_steps["prep"]
         clf          = pipeline.named_steps["clf"]
         feat_names   = ct.get_feature_names_out()
         importances  = clf.feature_importances_
@@ -218,7 +218,25 @@ def main() -> None:
     print(f"  Train: {len(X_train):,} rows  |  Test: {len(X_test):,} rows")
     print(f"  y_train  mean={y_train.mean():.3f}  std={y_train.std():.3f}")
 
-    pipeline = build_pipeline(args.high_card, args.scale_numeric)
+    # Load feature selection from notebook output (results/m3_selection.json)
+    sel_path = RESULTS_DIR / "m3_selection.json"
+    if sel_path.exists():
+        selection        = json.loads(sel_path.read_text(encoding="utf-8"))
+        selected_features = selection["selected_features"]
+        high_card         = selection.get("high_card_strategy", args.high_card)
+        print(f"  Loaded {len(selected_features)} features from m3_selection.json (strategy={high_card})")
+    else:
+        # Fallback: all available raw columns + all engineered groups
+        GROUP    = "Order Id"
+        DATE_COL = "order date (DateOrders)"
+        selected_features = (
+            [c for c in X_train.columns if c not in (GROUP, DATE_COL)]
+            + [u for u in ENGINEERED if all(c in X_train.columns for c in ENGINEERED[u])]
+        )
+        high_card = args.high_card
+        print(f"  m3_selection.json not found — using {len(selected_features)} fallback features")
+
+    pipeline = build_pipeline(X_train, selected_features, high_card)
     cv       = GroupKFold(n_splits=args.cv_folds)
 
     # ---------------------------------------------------------------- CV / tune
