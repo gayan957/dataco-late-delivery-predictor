@@ -1,1 +1,2 @@
 timestamp,model,accuracy,precision,recall,f1,roc_auc,tuned,high_card,notes
+2026-09-25T10:38:35,xgboost,regression,/Users/primeshofficial/Documents/Projects/dataco-late-delivery-predictor/dataco-late-delivery-predictor/data/processed/local,target,False,1.0079,1.3064,0.3605,0.6498,0.7175

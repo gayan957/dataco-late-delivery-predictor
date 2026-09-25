@@ -1,23 +1,39 @@
 # Owner: M3 – Primesh Marasingha
 """
-Streamlit UI for the DataCo Late Delivery Risk Predictor.
+Streamlit UI — DataCo Late Delivery Days Predictor (Regression).
 
-Start with:
-    make ui          # requires `make api` running on port 8000
+Modes
+-----
+  API mode  : POST /predict to backend/app.py  (make api)
+  Local mode: loads models/xgb_pipeline.pkl directly if API is unreachable
 
-Inputs:  order-time fields only (no leakage)
-Outputs: delivery-risk probability, High/Medium/Low tier, suggested action
+Start: make ui   (requires make api in a second terminal, OR the pkl is present)
 """
 from __future__ import annotations
 
-from datetime import date
+import warnings
+from datetime import date, datetime
+from pathlib import Path
 
+import pandas as pd
 import requests
 import streamlit as st
 
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
+
 BACKEND_URL = "http://localhost:8000"
 
-SHIPPING_MODES = ["Standard Class", "Second Class", "First Class", "Same Day"]
+# Scheduled days per shipping mode (confirmed from raw data)
+SCHEDULED_DAYS = {
+    "Same Day":       0,
+    "First Class":    1,
+    "Second Class":   2,
+    "Standard Class": 4,
+}
+
+SHIPPING_MODES = list(SCHEDULED_DAYS.keys())
 PAYMENT_TYPES  = ["DEBIT", "TRANSFER", "CASH", "PAYMENT"]
 SEGMENTS       = ["Consumer", "Corporate", "Home Office"]
 MARKETS        = ["LATAM", "Europe", "Pacific Asia", "USCA", "Africa"]
@@ -31,18 +47,14 @@ REGIONS        = [
 CATEGORIES = [
     "Fishing", "Cleats", "Camping & Hiking", "Cardio Equipment",
     "Women's Apparel", "Water Sports", "Men's Footwear",
-    "Indoor/Outdoor Games", "Accessories", "Trade-In",
-    "As Seen on TV!", "Golf Bags & Carts", "Electronics",
-    "Strength Training", "Men's Golf Clubs", "Team Sports",
-    "Tennis & Racquet", "Women's Golf Clubs", "Garden",
-    "Baseball & Softball", "Girls' Apparel", "Shop All Sports",
-    "Boys' Apparel", "Computers", "Health and Beauty", "DVDs",
-    "Music", "Books", "Cameras", "Video Games", "Baby",
-    "Soccer", "Hunting & Shooting", "Toy Vehicles", "Movies",
-    "Children's Books", "Cell Phones", "Basketball", "Hockey",
-    "Pet Supplies", "Football", "Hockey Equipment", "Swimming",
-    "Boxing & MMA", "Lacrosse", "Rugby", "Volleyball",
-    "Other Sports",
+    "Indoor/Outdoor Games", "Accessories", "Golf Bags & Carts",
+    "Electronics", "Strength Training", "Team Sports",
+    "Tennis & Racquet", "Garden", "Baseball & Softball",
+    "Boys' Apparel", "Girls' Apparel", "Computers",
+    "Health and Beauty", "DVDs", "Music", "Books", "Cameras",
+    "Video Games", "Baby", "Soccer", "Hunting & Shooting",
+    "Basketball", "Hockey", "Pet Supplies", "Football",
+    "Swimming", "Boxing & MMA", "Lacrosse",
 ]
 DEPARTMENTS = [
     "Outdoors", "Fan Shop", "Golf", "Apparel", "Footwear",
@@ -50,51 +62,139 @@ DEPARTMENTS = [
     "DVDs", "Books", "Baby", "Pet Shop",
 ]
 
-TIER_STYLES = {
-    "High":   {"bg": "#fee2e2", "border": "#ef4444", "icon": "🔴",
-               "action": "Flag immediately for expedited processing. "
-                         "Notify the customer and consider upgrading the shipping mode."},
-    "Medium": {"bg": "#fef9c3", "border": "#eab308", "icon": "🟡",
-               "action": "Monitor this order closely. "
-                         "Review shipping mode and carrier capacity."},
-    "Low":    {"bg": "#dcfce7", "border": "#22c55e", "icon": "🟢",
-               "action": "No action required. Process through standard fulfilment."},
+VERDICT_STYLE = {
+    True:  {"label": "LATE",    "color": "#dc2626", "bg": "#fee2e2",
+            "icon": "🔴",
+            "tip":  "Consider expediting or upgrading the shipping mode."},
+    False: {"label": "ON TIME", "color": "#16a34a", "bg": "#dcfce7",
+            "icon": "🟢",
+            "tip":  "No action required. Standard processing."},
 }
 
+# ---------------------------------------------------------------------------
+# Local model (fallback when API is down)
+# ---------------------------------------------------------------------------
 
-def _risk_tier(prob: float) -> str:
-    if prob >= 0.65:
-        return "High"
-    if prob >= 0.35:
-        return "Medium"
-    return "Low"
+@st.cache_resource(show_spinner=False)
+def _load_local_model():
+    path = Path("models/xgb_pipeline.pkl")
+    if not path.exists():
+        return None
+    try:
+        import joblib
+        return joblib.load(path)
+    except Exception:
+        return None
 
 
-def _call_backend(payload: dict) -> dict:
+def _build_input_row(
+    shipping_mode: str,
+    payment_type: str,
+    customer_segment: str,
+    market: str,
+    order_region: str,
+    order_country: str,
+    order_city: str,
+    customer_city: str,
+    customer_country: str,
+    category_name: str,
+    product_name: str,
+    department_name: str,
+    product_price: float,
+    quantity: int,
+    discount_rate: float,
+    order_date: date,
+) -> pd.DataFrame:
+    """Map form values to a DataFrame the pipeline expects."""
+    # Format date to match M2's DateFeatures parse format
+    d   = datetime.combine(order_date, datetime.min.time())
+    dt_str = f"{d.month}/{d.day:02d}/{d.year} 00:00"
+
+    sales    = product_price * quantity * (1.0 - discount_rate)
+    discount = product_price * quantity * discount_rate
+    sched    = SCHEDULED_DAYS.get(shipping_mode, 4)
+
+    row = {
+        # Core categoricals
+        "Shipping Mode":                shipping_mode,
+        "Type":                         payment_type,
+        "Customer Segment":             customer_segment,
+        "Market":                       market,
+        "Order Region":                 order_region,
+        "Order Country":                order_country,
+        "Order City":                   order_city,
+        "Order State":                  "",          # unknown at UI time
+        "Customer City":                customer_city,
+        "Customer State":               "",
+        "Customer Country":             customer_country,
+        "Category Name":                category_name,
+        "Product Name":                 product_name or category_name,
+        "Department Name":              department_name,
+        # Date (M2's DateFeatures parses this)
+        "order date (DateOrders)":      dt_str,
+        # Numeric features
+        "Days for shipment (scheduled)": sched,
+        "Product Price":                product_price,
+        "Order Item Quantity":          quantity,
+        "Order Item Discount Rate":     discount_rate,
+        "Order Item Discount":          discount,
+        "Sales":                        sales,
+        "Benefit per order":            0.0,         # unknown at order time
+        "Sales per customer":           sales,
+        "Order Item Profit Ratio":      0.0,
+        "Latitude":                     0.0,
+        "Longitude":                    0.0,
+        # Order-level columns (used by M2's OrderFeatures; 1-item dummy order)
+        "Order Id":                     999_999_999,
+    }
+    return pd.DataFrame([row])
+
+
+def _local_predict(df: pd.DataFrame, shipping_mode: str) -> dict:
+    model = _load_local_model()
+    if model is None:
+        raise FileNotFoundError(
+            "models/xgb_pipeline.pkl not found. Run `make train-xgb` first."
+        )
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        pred_days = float(model.predict(df)[0])
+
+    sched   = SCHEDULED_DAYS.get(shipping_mode, 4)
+    is_late = pred_days > sched
+    return {
+        "predicted_days": round(pred_days, 2),
+        "scheduled_days": sched,
+        "is_late":        is_late,
+    }
+
+
+def _api_predict(payload: dict) -> dict:
     resp = requests.post(f"{BACKEND_URL}/predict", json=payload, timeout=10)
     resp.raise_for_status()
     return resp.json()
 
 
+# ---------------------------------------------------------------------------
+# UI
+# ---------------------------------------------------------------------------
+
 def main() -> None:
     st.set_page_config(
-        page_title="Late Delivery Risk Predictor",
+        page_title="Delivery Days Predictor",
         page_icon="📦",
         layout="centered",
     )
 
-    st.title("📦 Late Delivery Risk Predictor")
-    st.caption("IT3051 Fundamentals of Data Mining · DataCo Smart Supply Chain")
+    st.title("📦 Delivery Days Predictor")
+    st.caption("IT3051 Data Mining · DataCo Supply Chain · Regression model")
 
-    # ----------------------------------------------------------------
-    # Input form
-    # ----------------------------------------------------------------
-    with st.form("order_form"):
+    # ---------------------------------------------------------------- form
+    with st.form("predict_form"):
         st.subheader("Order Details")
+        col1, col2 = st.columns(2)
 
-        col_a, col_b = st.columns(2)
-
-        with col_a:
+        with col1:
             shipping_mode    = st.selectbox("Shipping Mode *", SHIPPING_MODES)
             payment_type     = st.selectbox("Payment Type *", PAYMENT_TYPES)
             customer_segment = st.selectbox("Customer Segment *", SEGMENTS)
@@ -102,143 +202,150 @@ def main() -> None:
             order_region     = st.selectbox("Order Region *", REGIONS)
             department_name  = st.selectbox("Department *", DEPARTMENTS)
 
-        with col_b:
-            category_name = st.selectbox("Category *", CATEGORIES)
-            order_country = st.text_input("Order Country", value="United States")
-            order_city    = st.text_input("Order City", value="Chicago")
-            product_name  = st.text_input("Product Name", value="")
-            product_price = st.number_input(
-                "Product Price ($) *", min_value=0.0, value=50.0, step=0.01,
-            )
-            quantity = st.number_input(
-                "Quantity *", min_value=1, max_value=100, value=1, step=1,
-            )
+        with col2:
+            category_name    = st.selectbox("Category *", CATEGORIES)
+            order_country    = st.text_input("Order Country *", value="United States")
+            order_city       = st.text_input("Order City", value="Chicago")
+            customer_country = st.text_input("Customer Country", value="United States")
+            customer_city    = st.text_input("Customer City", value="")
+            product_name     = st.text_input("Product Name (optional)", value="")
 
         st.markdown("---")
-        col_c, col_d = st.columns(2)
-        with col_c:
-            discount_rate = st.slider(
-                "Discount Rate", min_value=0.0, max_value=1.0,
-                value=0.0, step=0.01, format="%.2f",
-            )
-        with col_d:
-            order_date = st.date_input("Order Date", value=date.today())
+        col3, col4, col5 = st.columns(3)
+        with col3:
+            product_price = st.number_input("Product Price ($) *", min_value=0.01,
+                                            value=50.0, step=0.01)
+        with col4:
+            quantity      = st.number_input("Quantity *", min_value=1, max_value=100,
+                                            value=1, step=1)
+        with col5:
+            discount_rate = st.slider("Discount Rate", 0.0, 1.0, 0.0, 0.01)
+
+        order_date = st.date_input("Order Date", value=date.today())
 
         submitted = st.form_submit_button(
-            "Predict Delivery Risk", use_container_width=True, type="primary",
+            "Predict Delivery Days", use_container_width=True, type="primary"
         )
 
-    # ----------------------------------------------------------------
-    # Validation
-    # ----------------------------------------------------------------
+    # ---------------------------------------------------------------- on submit
     if submitted:
+        # Validation
         errors = []
         if not order_country.strip():
             errors.append("Order Country is required.")
-        if not order_city.strip():
-            errors.append("Order City is required.")
         if product_price <= 0:
             errors.append("Product Price must be greater than 0.")
-
+        for err in errors:
+            st.error(err)
         if errors:
-            for err in errors:
-                st.error(err)
             st.stop()
 
-        # ----------------------------------------------------------------
-        # Backend call
-        # ----------------------------------------------------------------
-        payload = {
-            "shipping_mode":    shipping_mode,
-            "payment_type":     payment_type,
-            "customer_segment": customer_segment,
-            "market":           market,
-            "order_region":     order_region,
-            "order_country":    order_country.strip(),
-            "order_city":       order_city.strip(),
-            "category_name":    category_name,
-            "product_name":     product_name.strip() or category_name,
-            "department_name":  department_name,
-            "product_price":    float(product_price),
-            "quantity":         int(quantity),
-            "discount_rate":    float(discount_rate),
-        }
+        input_df = _build_input_row(
+            shipping_mode, payment_type, customer_segment, market, order_region,
+            order_country.strip(), order_city.strip(),
+            customer_city.strip(), customer_country.strip(),
+            category_name, product_name.strip(), department_name,
+            product_price, int(quantity), discount_rate, order_date,
+        )
 
-        with st.spinner("Running model…"):
+        result = None
+        mode_label = ""
+
+        with st.spinner("Running model …"):
+            # Try API first
             try:
-                result = _call_backend(payload)
+                payload = {
+                    "shipping_mode":    shipping_mode,
+                    "payment_type":     payment_type,
+                    "customer_segment": customer_segment,
+                    "market":           market,
+                    "order_region":     order_region,
+                    "order_country":    order_country.strip(),
+                    "order_city":       order_city.strip(),
+                    "customer_city":    customer_city.strip(),
+                    "customer_country": customer_country.strip(),
+                    "category_name":    category_name,
+                    "product_name":     product_name.strip() or category_name,
+                    "department_name":  department_name,
+                    "product_price":    float(product_price),
+                    "quantity":         int(quantity),
+                    "discount_rate":    float(discount_rate),
+                    "order_date":       str(order_date),
+                }
+                result     = _api_predict(payload)
+                mode_label = "API"
             except requests.exceptions.ConnectionError:
-                st.error(
-                    "**Cannot reach the backend.** "
-                    "Make sure the API is running: run `make api` in a separate terminal."
-                )
-                st.stop()
+                pass  # fall through to local mode
             except requests.exceptions.HTTPError as exc:
                 code = exc.response.status_code
-                detail = exc.response.json().get("detail", exc.response.text)
                 if code == 501:
-                    st.warning(
-                        "⚙️ The inference endpoint is not yet implemented "
-                        "(backend/app.py TODO). "
-                        "Once M3 wires up the model, predictions will appear here."
-                    )
+                    pass  # backend stub not implemented yet — use local
                 else:
-                    st.error(f"Backend error {code}: {detail}")
-                st.stop()
+                    st.error(f"Backend error {code}: {exc.response.text}")
+                    st.stop()
             except requests.exceptions.Timeout:
-                st.error("Request timed out. The backend may be busy.")
-                st.stop()
-            except Exception as exc:
-                st.error(f"Unexpected error: {exc}")
-                st.stop()
+                st.warning("API timed out — falling back to local model.")
 
-        # ----------------------------------------------------------------
-        # Result display
-        # ----------------------------------------------------------------
-        prob  = result["probability"]
-        label = result["label"]
-        tier  = result["risk_tier"]
-        style = TIER_STYLES[tier]
+            # Fall back to local pkl
+            if result is None:
+                try:
+                    result     = _local_predict(input_df, shipping_mode)
+                    mode_label = "Local pkl"
+                except FileNotFoundError as exc:
+                    st.error(
+                        f"**No model available.**  {exc}\n\n"
+                        "Start the API (`make api`) or train a model (`make train-xgb`)."
+                    )
+                    st.stop()
+                except Exception as exc:
+                    st.error(f"Local inference failed: {exc}")
+                    st.stop()
+
+        # ---------------------------------------------------------------- display
+        pred_days  = result["predicted_days"]
+        sched_days = result["scheduled_days"]
+        is_late    = result.get("is_late", pred_days > sched_days)
+        vs         = VERDICT_STYLE[is_late]
 
         st.divider()
         st.subheader("Prediction")
 
         m1, m2, m3 = st.columns(3)
-        m1.metric("Risk Probability", f"{prob:.1%}")
-        m2.metric("Prediction",       "Late" if label == 1 else "On Time")
-        m3.metric("Risk Tier",        f"{style['icon']} {tier}")
+        m1.metric("Predicted Days",  f"{pred_days:.1f}")
+        m2.metric("Scheduled Days",  sched_days)
+        m3.metric("Mode used",       mode_label)
 
-        st.progress(min(prob, 1.0))
-
-        # Risk tier card
+        # Verdict card
         st.markdown(
             f"""
             <div style="
-                background:{style['bg']};
-                border-left: 4px solid {style['border']};
-                border-radius: 6px;
-                padding: 12px 16px;
-                margin-top: 12px;
+                background:{vs['bg']};
+                border-left:5px solid {vs['color']};
+                border-radius:6px;
+                padding:14px 18px;
+                margin-top:10px;
             ">
-                <strong>{style['icon']} {tier} Risk — Suggested Action</strong><br>
-                {style['action']}
+                <span style="font-size:1.3rem;font-weight:700;color:{vs['color']};">
+                    {vs['icon']}  {vs['label']}
+                </span><br>
+                Predicted <b>{pred_days:.1f} days</b> vs scheduled
+                <b>{sched_days} days</b>
+                ({shipping_mode})<br>
+                <i>{vs['tip']}</i>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-        # Order summary expander
-        with st.expander("Order summary"):
-            st.json({
-                "shipping_mode":    shipping_mode,
-                "market":           market,
-                "order_region":     order_region,
-                "category":         category_name,
-                "product_price":    f"${product_price:.2f}",
-                "quantity":         quantity,
-                "discount_rate":    f"{discount_rate:.0%}",
-                "order_date":       str(order_date),
-            })
+        # Shipping mode context
+        st.caption(
+            f"ℹ️ For **{shipping_mode}**, scheduled = {sched_days} day(s). "
+            f"Historical mean real days: "
+            f"Same Day≈0.5 · First Class≈2.0 · Second Class≈4.0 · Standard Class≈4.0"
+        )
+
+        with st.expander("Order summary sent to model"):
+            st.dataframe(input_df.T.rename(columns={0: "value"}))
 
 
 if __name__ == "__main__":
