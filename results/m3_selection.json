@@ -1,0 +1,39 @@
+{
+  "target": "Days for shipping (real)",
+  "high_card_strategy": "drop",
+  "low_card_max": 30,
+  "selected_features": [
+    "Shipping Mode",
+    "date_features",
+    "Order Item Discount"
+  ],
+  "dropped_features": {
+    "Type": "low drop-column importance",
+    "Benefit per order": "low drop-column importance",
+    "Sales per customer": "low drop-column importance",
+    "Category Id": "low drop-column importance",
+    "Category Name": "low drop-column importance",
+    "Customer City": "low drop-column importance",
+    "Customer Country": "low drop-column importance",
+    "Customer Segment": "low drop-column importance",
+    "Customer State": "low drop-column importance",
+    "Department Name": "low drop-column importance",
+    "Latitude": "low drop-column importance",
+    "Longitude": "low drop-column importance",
+    "Market": "low drop-column importance",
+    "Order City": "low drop-column importance",
+    "Order Country": "low drop-column importance",
+    "Order Item Discount Rate": "low drop-column importance",
+    "Order Item Profit Ratio": "low drop-column importance",
+    "Order Item Quantity": "low drop-column importance",
+    "Order Region": "low drop-column importance",
+    "Order State": "low drop-column importance",
+    "Product Name": "low drop-column importance",
+    "Product Price": "low drop-column importance",
+    "order_features": "low drop-column importance",
+    "geo_features": "low drop-column importance",
+    "Sales": "|r| = 0.99 with 'Sales per customer'"
+  },
+  "cv": "StratifiedGroupKFold(5) grouped by Order Id",
+  "selected_cv_MAE": 0.9758
+}
