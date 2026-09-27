@@ -1,0 +1,47 @@
+{
+  "target": "Days for shipping (real)",
+  "features": [
+    "Shipping Mode",
+    "Market",
+    "Order Country",
+    "Category Name",
+    "Order Item Quantity",
+    "Customer Segment",
+    "order_weekday",
+    "order_month",
+    "order_hour",
+    "order_quarter",
+    "is_weekend"
+  ],
+  "validation": "StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=42), grouped by Order Id, stratified on the target",
+  "metrics": [
+    "MAE",
+    "RMSE",
+    "R2",
+    "MedAE",
+    "within_1_day_%",
+    "bias"
+  ],
+  "primary_metric": "MAE",
+  "outlier_treatment": "none",
+  "scaler_by_model_family": {
+    "linear (Ridge / Linear Regression)": {
+      "scaler": "minmax",
+      "cv_MAE": 0.9959
+    },
+    "distance (KNN)": {
+      "scaler": "minmax",
+      "cv_MAE": 1.0462
+    },
+    "tree (Decision Tree / Random Forest / XGBoost)": {
+      "scaler": "none",
+      "cv_MAE": 0.9836
+    }
+  },
+  "reference_cv_MAE": {
+    "Baseline: predict the mean": 1.4276,
+    "Baseline: mean per Shipping Mode": 0.9867,
+    "Team features: Ridge": 0.9959,
+    "Team features: HistGB (default)": 0.9836
+  }
+}

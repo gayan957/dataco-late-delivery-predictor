@@ -39,19 +39,19 @@
     },
     {
       "column": "Customer Fname",
-      "reason": "Personal data (PII), no predictive meaning"
+      "reason": "Personal data (PII)"
     },
     {
       "column": "Customer Lname",
-      "reason": "Personal data (PII), no predictive meaning"
+      "reason": "Personal data (PII)"
     },
     {
       "column": "Customer Street",
-      "reason": "Personal data (PII), no predictive meaning"
+      "reason": "Personal data (PII)"
     },
     {
       "column": "Customer Zipcode",
-      "reason": "Personal data (PII), no predictive meaning"
+      "reason": "Personal data (PII)"
     },
     {
       "column": "Order Zipcode",
@@ -110,8 +110,9 @@
       "reason": "Identifier: would let the model memorise customers"
     }
   ],
-  "feature_columns": [
+  "remaining_columns": [
     "Type",
+    "Days for shipping (real)",
     "Benefit per order",
     "Sales per customer",
     "Category Id",
@@ -127,6 +128,7 @@
     "Order City",
     "Order Country",
     "order date (DateOrders)",
+    "Order Id",
     "Order Item Discount",
     "Order Item Discount Rate",
     "Order Item Profit Ratio",

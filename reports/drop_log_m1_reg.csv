@@ -6,10 +6,10 @@ Order Status,Leakage: recorded after fulfilment (used only to filter)
 Days for shipment (scheduled),Redundant: fully determined by Shipping Mode
 Customer Email,"Masked (all 'XXXXXXXXX'), no information"
 Customer Password,"Masked (all 'XXXXXXXXX'), no information"
-Customer Fname,"Personal data (PII), no predictive meaning"
-Customer Lname,"Personal data (PII), no predictive meaning"
-Customer Street,"Personal data (PII), no predictive meaning"
-Customer Zipcode,"Personal data (PII), no predictive meaning"
+Customer Fname,Personal data (PII)
+Customer Lname,Personal data (PII)
+Customer Street,Personal data (PII)
+Customer Zipcode,Personal data (PII)
 Order Zipcode,86.3% missing
 Product Description,100.0% missing
 Product Status,Constant: a single value in every row
