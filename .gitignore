@@ -1,4 +1,5 @@
 data/*.csv
+data/processed/local/
 models/*.pkl
 .venv/
 __pycache__/
@@ -11,3 +12,5 @@ dist/
 build/
 .pytest_cache/
 *.log
+data/*.csv
+data/**/*.csv
