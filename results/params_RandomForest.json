@@ -1,0 +1,22 @@
+{
+  "model": "RandomForest",
+  "owner": "M2",
+  "scaler": "none",
+  "best_params": {
+    "n_estimators": 300,
+    "min_samples_leaf": 20,
+    "max_features": 1.0,
+    "max_depth": 8
+  },
+  "cv_MAE_default": 0.9997,
+  "cv_MAE_tuned": 0.965,
+  "cv_MAE_std": 0.0103,
+  "cv_scores_tuned": {
+    "MAE": 0.965,
+    "RMSE": 1.2684,
+    "R2": 0.3914,
+    "MedAE": 0.9951,
+    "within_1_day_%": 52.0638,
+    "bias": -0.0002
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "model": "XGBoost",
+  "owner": "M3",
+  "scaler": "none",
+  "best_params": {
+    "subsample": 1.0,
+    "n_estimators": 200,
+    "min_child_weight": 10,
+    "max_depth": 3,
+    "learning_rate": 0.05,
+    "colsample_bytree": 0.7
+  },
+  "cv_MAE_default": 1.0027,
+  "cv_MAE_tuned": 0.9692,
+  "cv_MAE_std": 0.01,
+  "cv_scores_tuned": {
+    "MAE": 0.9692,
+    "RMSE": 1.2678,
+    "R2": 0.3919,
+    "MedAE": 0.9942,
+    "within_1_day_%": 51.9912,
+    "bias": -0.0005
+  }
+}

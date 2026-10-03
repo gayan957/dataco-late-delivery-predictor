@@ -1,0 +1,21 @@
+{
+  "model": "DecisionTree",
+  "owner": "M4",
+  "scaler": "none",
+  "best_params": {
+    "min_samples_split": 2,
+    "min_samples_leaf": 50,
+    "max_depth": 3
+  },
+  "cv_MAE_default": 1.3108,
+  "cv_MAE_tuned": 0.9617,
+  "cv_MAE_std": 0.0103,
+  "cv_scores_tuned": {
+    "MAE": 0.9617,
+    "RMSE": 1.2666,
+    "R2": 0.393,
+    "MedAE": 0.9897,
+    "within_1_day_%": 52.197,
+    "bias": -0.0
+  }
+}

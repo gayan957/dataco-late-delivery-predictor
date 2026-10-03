@@ -1,0 +1,21 @@
+{
+  "model": "KNN",
+  "owner": "M4",
+  "scaler": "minmax",
+  "best_params": {
+    "weights": "uniform",
+    "p": 2,
+    "n_neighbors": 50
+  },
+  "cv_MAE_default": 1.0383,
+  "cv_MAE_tuned": 1.0091,
+  "cv_MAE_std": 0.0094,
+  "cv_scores_tuned": {
+    "MAE": 1.0091,
+    "RMSE": 1.2962,
+    "R2": 0.3644,
+    "MedAE": 0.964,
+    "within_1_day_%": 52.2061,
+    "bias": 0.0005
+  }
+}
