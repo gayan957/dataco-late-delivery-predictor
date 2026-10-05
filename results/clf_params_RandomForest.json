@@ -1,0 +1,22 @@
+{
+  "model": "RandomForest",
+  "owner": "M2",
+  "scaler": "none",
+  "best_params": {
+    "n_estimators": 100,
+    "min_samples_leaf": 50,
+    "max_features": 0.5,
+    "max_depth": 8,
+    "class_weight": "balanced"
+  },
+  "cv_roc_auc_default": 0.7664,
+  "cv_roc_auc_tuned": 0.7725,
+  "cv_roc_auc_std": 0.0046,
+  "cv_scores_tuned": {
+    "roc_auc": 0.7725,
+    "accuracy": 0.7228,
+    "precision": 0.8941,
+    "recall": 0.5845,
+    "f1": 0.7069
+  }
+}
