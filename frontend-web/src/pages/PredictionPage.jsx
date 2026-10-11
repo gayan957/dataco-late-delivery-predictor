@@ -1,157 +1,41 @@
 import { useState, useEffect } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import OrderForm from '../components/OrderForm'
 import ResultPanel from '../components/ResultPanel'
-import ModeComparison from '../components/ModeComparison'
 import ModelInfo from '../components/ModelInfo'
-import { predictCombined, predict, checkHealth } from '../api'
-
-const COMPARE_MODES = ['Same Day', 'First Class', 'Second Class', 'Standard Class']
+import { predictCombined, checkHealth } from '../api'
 
 const HERO_STATS = [
-  { value: '180,519', label: 'Orders trained on' },
+  { value: '172,765', label: 'Order items analysed' },
   { value: '54.8%',   label: 'Historical late rate' },
-  { value: '5',       label: 'Models compared' },
-  { value: 'MAE 0.94d', label: 'Best accuracy score' },
+  { value: '0.773',   label: 'Classifier ROC-AUC' },
+  { value: '0.94 d',  label: 'Average error (days)' },
 ]
 
-function Hero({ apiStatus }) {
+function Hero() {
   return (
     <motion.section
-      initial={{ opacity: 0, y: -28 }}
+      initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-      className="page-hero"
-      style={{
-        position: 'relative',
-        borderRadius: 24,
-        overflow: 'hidden',
-        background: 'linear-gradient(135deg, #1e3160 0%, #16254a 55%, #0f1b33 100%)',
-        padding: '2.75rem 2.5rem 2.5rem',
-        marginBottom: '2rem',
-      }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="page-hero logi-hero"
     >
-      {/* Decorative circles */}
-      <div style={{
-        position: 'absolute', top: -90, right: -90,
-        width: 340, height: 340, borderRadius: '50%',
-        background: 'rgba(255,255,255,0.06)', pointerEvents: 'none',
-      }} />
-      <div style={{
-        position: 'absolute', bottom: -70, left: '38%',
-        width: 220, height: 220, borderRadius: '50%',
-        background: 'rgba(255,255,255,0.04)', pointerEvents: 'none',
-      }} />
-      <div style={{
-        position: 'absolute', top: 15, right: 220,
-        width: 90, height: 90, borderRadius: '50%',
-        background: 'rgba(255,255,255,0.07)', pointerEvents: 'none',
-      }} />
-
-      {/* Two-column: text left, van GIF right */}
-      <div className="pred-hero-row" style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: '2rem' }}>
-
-        {/* ── Left: text content ── */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          {/* Title row */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.2rem', marginBottom: '1rem' }}>
-            <div style={{ flex: 1 }}>
-              <p className="eda-hero-eyebrow" style={{ margin: '0 0 0.6rem' }}>
-                Logistics · Delivery risk analysis
-              </p>
-              <h1 style={{
-                color: '#ffffff', fontWeight: 800, fontSize: '2rem',
-                margin: 0, letterSpacing: '-0.03em', lineHeight: 1.15,
-              }}>
-                Delivery <span className="accent">Risk</span> Prediction
-              </h1>
+      <div className="logi-hero-photo" style={{ backgroundImage: 'url(/logistics-network.jpg)' }} />
+      <div className="logi-hero-content">
+        <p className="eda-hero-eyebrow" style={{ margin: '0 0 0.7rem' }}>Logistics · Delivery risk analysis</p>
+        <h1 className="logi-hero-title">Delivery <span className="accent">Risk</span> Prediction</h1>
+        <p className="logi-hero-sub">
+          Assess each order at the moment it is placed: the probability of late delivery and the
+          estimated number of shipping days.
+        </p>
+        <dl className="logi-stats">
+          {HERO_STATS.map(s => (
+            <div key={s.label} className="logi-stat">
+              <dt>{s.label}</dt>
+              <dd>{s.value}</dd>
             </div>
-
-            {apiStatus !== null && (
-              <div style={{
-                flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
-                background: 'rgba(255,255,255,0.12)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                borderRadius: 20, padding: '0.4rem 0.9rem',
-                fontSize: '0.7rem', color: 'rgba(255,255,255,0.9)', fontWeight: 600,
-              }}>
-                <span style={{
-                  display: 'inline-block', width: 7, height: 7, borderRadius: '50%',
-                  background: apiStatus ? '#4ade80' : '#f87171',
-                  boxShadow: `0 0 6px ${apiStatus ? '#4ade80' : '#f87171'}`,
-                }} />
-                {apiStatus ? 'API Online' : 'API Offline'}
-              </div>
-            )}
-          </div>
-
-          {/* Description */}
-          <p style={{
-            color: 'rgba(255,255,255,0.85)', fontSize: '0.95rem',
-            lineHeight: 1.65, margin: '0 0 1.6rem', maxWidth: 540,
-          }}>
-            Assess each order at the moment it is placed: estimated shipping days, the probability of late
-            delivery, and how the outcome changes across shipping modes.
-          </p>
-
-          {/* Stats chips */}
-          <div style={{ display: 'flex', gap: '0.7rem', flexWrap: 'wrap' }}>
-            {HERO_STATS.map((s, i) => (
-              <motion.div
-                key={s.label}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.12 + i * 0.07 }}
-                style={{
-                  background: 'rgba(255,255,255,0.12)',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: 12, padding: '0.6rem 1.1rem',
-                  minWidth: 100, textAlign: 'center',
-                }}
-              >
-                <div style={{ color: '#fff', fontWeight: 900, fontSize: '1.1rem', lineHeight: 1 }}>
-                  {s.value}
-                </div>
-                <div style={{
-                  color: 'rgba(255,255,255,0.6)', fontSize: '0.6rem', fontWeight: 600,
-                  marginTop: 3, textTransform: 'uppercase', letterSpacing: '0.06em',
-                }}>
-                  {s.label}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Right: delivery van GIF ── */}
-        <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="pred-hero-media"
-          style={{
-            flexShrink: 0,
-            width: 480,
-            height: 300,
-            overflow: 'hidden',
-            /* fade both left and right edges into the hero gradient */
-            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 18%, black 82%, transparent 100%)',
-            maskImage:       'linear-gradient(to right, transparent 0%, black 18%, black 82%, transparent 100%)',
-          }}
-        >
-          <img
-            src="/delivery-van.gif"
-            alt="Delivery van"
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'center',
-              display: 'block',
-            }}
-          />
-        </motion.div>
-
+          ))}
+        </dl>
       </div>
     </motion.section>
   )
@@ -163,7 +47,6 @@ export default function PredictionPage() {
   const [loading,         setLoading]         = useState(false)
   const [error,           setError]           = useState(null)
   const [lastFields,      setLastFields]      = useState(null)
-  const [comparison,      setComparison]      = useState(null)
   const [apiStatus,       setApiStatus]       = useState(null)
 
   useEffect(() => {
@@ -175,17 +58,12 @@ export default function PredictionPage() {
     setError(null)
     setPrediction(null)
     setClassification(null)
-    setComparison(null)
 
     try {
-      const [combined, comp] = await Promise.all([
-        predictCombined(fields),
-        Promise.all(COMPARE_MODES.map(mode => predict({ ...fields, shipping_mode: mode }))),
-      ])
+      const combined = await predictCombined(fields)
       setPrediction(combined.regression)
       setClassification(combined.classification)
       setLastFields(fields)
-      setComparison(comp)
     } catch (e) {
       setError(e.message)
     } finally {
@@ -200,7 +78,7 @@ export default function PredictionPage() {
         margin: '0 auto',
         padding: '2rem 1.5rem 4rem',
       }} className="page-container">
-        <Hero apiStatus={apiStatus} />
+        <Hero />
 
         {/* API warning */}
         {apiStatus === false && (
@@ -231,20 +109,6 @@ export default function PredictionPage() {
           <OrderForm onSubmit={handleSubmit} loading={loading} />
           <ResultPanel prediction={prediction} classification={classification} loading={loading} error={error} lastFields={lastFields} />
         </div>
-
-        {/* Mode comparison */}
-        <AnimatePresence>
-          {comparison && (
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <ModeComparison data={comparison} selectedMode={lastFields?.shipping_mode} />
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         <ModelInfo />
       </div>

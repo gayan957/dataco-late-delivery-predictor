@@ -121,50 +121,6 @@ function RiskGauge({ probability, isLate }) {
   )
 }
 
-/* ── Metric tile ──────────────────────────────────────────────────────────── */
-function MetricTile({ label, value, color, bg, border }) {
-  return (
-    <div className="metric-tile" style={{ background: bg, border: `1px solid ${border}` }}>
-      <div style={{ fontSize: '1.2rem', fontWeight: 900, color, lineHeight: 1 }}>{value}</div>
-      <div style={{ fontSize: '0.6rem', color: '#94a3b8', fontWeight: 700,
-                    textTransform: 'uppercase', letterSpacing: '0.07em', marginTop: 4 }}>
-        {label}
-      </div>
-    </div>
-  )
-}
-
-/* ── Regression days row ──────────────────────────────────────────────────── */
-function RegressionRow({ prediction }) {
-  const delta    = prediction.late_by
-  const deltaStr = delta >= 0 ? `+${delta.toFixed(1)}d` : `${delta.toFixed(1)}d`
-  const isLate   = prediction.is_late
-
-  return (
-    <div style={{
-      background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12,
-      padding: '0.85rem 1rem', marginBottom: '0.85rem',
-    }}>
-      <div style={{
-        fontSize: '0.62rem', fontWeight: 800, color: '#94a3b8',
-        textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.6rem',
-      }}>
-        Regression Model · Days Estimate
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
-        <MetricTile label="Predicted" value={`${prediction.predicted_days.toFixed(1)}d`}
-          color="#e07b39" bg="#fdf1e7" border="#f5d3b8" />
-        <MetricTile label="Scheduled" value={`${prediction.scheduled_days}d`}
-          color="#475569" bg="#f8fafc" border="#e2e8f0" />
-        <MetricTile label="Delta" value={deltaStr}
-          color={isLate ? '#dc2626' : '#15803d'}
-          bg={isLate ? '#fef2f2' : '#f0fdf4'}
-          border={isLate ? '#fecaca' : '#bbf7d0'} />
-      </div>
-    </div>
-  )
-}
-
 /* ── Placeholder ──────────────────────────────────────────────────────────── */
 function Placeholder() {
   return (
@@ -260,80 +216,74 @@ function ErrorState({ message }) {
   )
 }
 
-/* ── Result card ──────────────────────────────────────────────────────────── */
-function ResultCard({ prediction, classification, lastFields }) {
-  const isLate   = classification.is_late
-  const color    = isLate ? '#dc2626' : '#15803d'
-  const borderC  = isLate ? '#fecaca'  : '#bbf7d0'
-  const topColor = isLate ? '#ef4444'  : '#22c55e'
-  const badgeBg  = isLate ? '#fef2f2'  : '#f0fdf4'
-  const tip      = isLate
+/* ── Result cards: classification and regression shown separately ──────── */
+function CardHeader({ tag, title, tagClass }) {
+  return (
+    <div className="res-head">
+      <span className={`res-tag ${tagClass}`}>{tag}</span>
+      <h3 className="res-title">{title}</h3>
+    </div>
+  )
+}
+
+function ClassificationCard({ classification, lastFields }) {
+  const isLate = classification.is_late
+  const tip = isLate
     ? (LATE_TIPS[lastFields?.shipping_mode] || 'Consider upgrading the shipping mode.')
     : 'This order is on track for on-time delivery. No action required.'
 
   return (
-    <motion.div key="result" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.96 }}
-      transition={{ duration: 0.45, ease: [0.34, 1.56, 0.64, 1] }}
-      className="card"
-      style={{ border: `1px solid ${borderC}`, borderTop: `4px solid ${topColor}`,
-               padding: '1.5rem 1.4rem 1.6rem', textAlign: 'center' }}>
-
-      <div className="section-label" style={{ justifyContent: 'center' }}>
-        Delivery Risk Assessment
-      </div>
-
-      {/* Primary: classification probability gauge */}
-      <div style={{ margin: '0.4rem 0 0.8rem' }}>
+    <div className={`card res-card ${isLate ? 'res-card-late' : 'res-card-ok'}`}>
+      <CardHeader tag="Classification" tagClass="res-tag-clf" title="Late-delivery risk" />
+      <div style={{ margin: '0.25rem 0 0.5rem' }}>
         <RiskGauge probability={classification.probability} isLate={isLate} />
       </div>
+      <div className={`res-verdict ${isLate ? 'res-verdict-late' : 'res-verdict-ok'}`}>
+        {isLate ? 'Likely late' : 'Likely on time'}
+        <span>alert threshold {Math.round(classification.threshold * 100)}%</span>
+      </div>
+      <div className="res-tip"><strong>Recommendation:</strong> {tip}</div>
+    </div>
+  )
+}
 
-      {/* Verdict badge */}
-      <motion.div
-        initial={{ scale: 0.7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.35, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-        style={{
-          display: 'inline-flex', alignItems: 'center', gap: 7, marginBottom: '1rem',
-          background: badgeBg, border: `1.5px solid ${borderC}`,
-          borderRadius: 100, padding: '0.45rem 1.4rem',
-          fontSize: '1rem', fontWeight: 800, color, letterSpacing: '0.03em',
-        }}>
-        {isLate ? (
-          <>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 strokeWidth="2.5" strokeLinecap="round">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-            LATE DELIVERY
-          </>
-        ) : (
-          <>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 strokeWidth="2.5" strokeLinecap="round">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-            ON TIME
-          </>
-        )}
-      </motion.div>
+function RegressionCard({ prediction }) {
+  const delta  = prediction.late_by
+  const isLate = prediction.is_late
+  const fmt = (d) => `${d.toFixed(1)} ${Math.abs(d) === 1 ? 'day' : 'days'}`
 
-      {/* Secondary: regression model row */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}>
-        <RegressionRow prediction={prediction} />
-      </motion.div>
+  return (
+    <div className={`card res-card ${isLate ? 'res-card-late' : 'res-card-ok'}`}>
+      <CardHeader tag="Regression" tagClass="res-tag-reg" title="Shipping-days estimate" />
+      <div className="res-days">
+        {prediction.predicted_days.toFixed(1)} <span>days</span>
+      </div>
+      <table className="data-table res-table">
+        <tbody>
+          <tr><td className="metric">Predicted shipping time</td><td className="num strong">{fmt(prediction.predicted_days)}</td></tr>
+          <tr><td className="metric">Scheduled for {prediction.shipping_mode}</td><td className="num">{fmt(prediction.scheduled_days)}</td></tr>
+          <tr>
+            <td className="metric">Difference</td>
+            <td className="num strong" style={{ color: isLate ? '#dc2626' : '#15803d' }}>
+              {delta > 0 ? '+' : ''}{fmt(delta)}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div className={`res-verdict ${isLate ? 'res-verdict-late' : 'res-verdict-ok'}`}>
+        {isLate ? 'Exceeds the scheduled window' : 'Within the scheduled window'}
+      </div>
+    </div>
+  )
+}
 
-      {/* Tip */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.65 }}
-        style={{
-          background: '#f8fafc', border: '1px solid #e2e8f0',
-          borderLeft: '3px solid #e07b39', borderRadius: '0 8px 8px 0',
-          padding: '0.7rem 0.9rem', fontSize: '0.76rem', color: '#475569',
-          lineHeight: 1.55, textAlign: 'left',
-        }}>
-        <span style={{ color: '#e07b39', fontWeight: 700 }}>Tip: </span>{tip}
-      </motion.div>
+function ResultCard({ prediction, classification, lastFields }) {
+  return (
+    <motion.div key="result" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      className="res-stack">
+      <ClassificationCard classification={classification} lastFields={lastFields} />
+      <RegressionCard prediction={prediction} />
     </motion.div>
   )
 }
