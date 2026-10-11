@@ -78,9 +78,9 @@ function RiskGauge({ probability, isLate }) {
         transform={`rotate(135 ${cx} ${cy})`} />
 
       {/* Threshold marker at 65 % */}
-      <circle cx={+tmx.toFixed(1)} cy={+tmy.toFixed(1)} r={6} fill="#6366f1" />
+      <circle cx={+tmx.toFixed(1)} cy={+tmy.toFixed(1)} r={6} fill="#e07b39" />
       <text x={+tlx.toFixed(1)} y={+tly.toFixed(1)} textAnchor="middle" dominantBaseline="middle"
-        fontSize={10} fill="#6366f1" fontWeight={700} fontFamily="Inter, system-ui, sans-serif">65%</text>
+        fontSize={10} fill="#e07b39" fontWeight={700} fontFamily="Inter, system-ui, sans-serif">65%</text>
 
       {/* Dot at arc tip */}
       {animFrac > 0.02 && (
@@ -153,7 +153,7 @@ function RegressionRow({ prediction }) {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
         <MetricTile label="Predicted" value={`${prediction.predicted_days.toFixed(1)}d`}
-          color="#4f46e5" bg="#eef2ff" border="#c7d2fe" />
+          color="#e07b39" bg="#fdf1e7" border="#f5d3b8" />
         <MetricTile label="Scheduled" value={`${prediction.scheduled_days}d`}
           color="#475569" bg="#f8fafc" border="#e2e8f0" />
         <MetricTile label="Delta" value={deltaStr}
@@ -170,7 +170,7 @@ function Placeholder() {
   return (
     <motion.div key="placeholder" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="card" style={{
-        border: '1.5px dashed #c7d2fe', minHeight: 440,
+        border: '1.5px dashed #f5d3b8', minHeight: 440,
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
         padding: '2.5rem 2rem', textAlign: 'center',
@@ -180,7 +180,7 @@ function Placeholder() {
         transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
         style={{
           width: 72, height: 72, borderRadius: 20, marginBottom: '1.25rem',
-          background: '#eef2ff', border: '1px solid #c7d2fe',
+          background: '#fdf1e7', border: '1px solid #f5d3b8',
           display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem',
         }}>📊</motion.div>
       <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
@@ -188,13 +188,13 @@ function Placeholder() {
       </div>
       <div style={{ fontSize: '0.82rem', color: '#64748b', lineHeight: 1.65 }}>
         Fill in the order details on the left<br/>
-        and click <strong style={{ color: '#4f46e5' }}>Predict Delivery Risk</strong>
+        and click <strong style={{ color: '#e07b39' }}>Predict Delivery Risk</strong>
       </div>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', marginTop: '1.5rem' }}>
         {[
           ['Classifier · ROC-AUC 0.77', '#15803d', '#f0fdf4', '#bbf7d0'],
-          ['Precision 89.4%',           '#7c3aed', '#f5f3ff', '#ddd6fe'],
-          ['Regression · MAE 0.96d',    '#4f46e5', '#eef2ff', '#c7d2fe'],
+          ['Precision 89.4%',           '#16254a', '#eef2f8', '#cfd8ea'],
+          ['Regression · MAE 0.96d',    '#e07b39', '#fdf1e7', '#f5d3b8'],
         ].map(([t, c, bg, br]) => (
           <span key={t} style={{
             background: bg, border: `1px solid ${br}`,
@@ -217,7 +217,7 @@ function LoadingState() {
       }}>
       <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
         style={{ width: 44, height: 44, borderRadius: '50%', marginBottom: '1.2rem',
-                 border: '3px solid #e2e8f0', borderTop: '3px solid #4f46e5' }} />
+                 border: '3px solid #e2e8f0', borderTop: '3px solid #e07b39' }} />
       <div style={{ fontSize: '0.9rem', color: '#334155', fontWeight: 600 }}>Running both models…</div>
       <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: 4 }}>
         Classifier + Regression in parallel
@@ -245,7 +245,7 @@ function ErrorState({ message }) {
         {message}<br /><br />Start the backend:
       </div>
       <code style={{ marginTop: 10, padding: '0.5rem 1.1rem', borderRadius: 8, fontSize: '0.8rem',
-                     background: '#f8fafc', border: '1px solid #e2e8f0', color: '#4f46e5' }}>
+                     background: '#f8fafc', border: '1px solid #e2e8f0', color: '#e07b39' }}>
         make api
       </code>
     </motion.div>
@@ -320,11 +320,11 @@ function ResultCard({ prediction, classification, lastFields }) {
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.65 }}
         style={{
           background: '#f8fafc', border: '1px solid #e2e8f0',
-          borderLeft: '3px solid #6366f1', borderRadius: '0 8px 8px 0',
+          borderLeft: '3px solid #e07b39', borderRadius: '0 8px 8px 0',
           padding: '0.7rem 0.9rem', fontSize: '0.76rem', color: '#475569',
           lineHeight: 1.55, textAlign: 'left',
         }}>
-        <span style={{ color: '#4f46e5', fontWeight: 700 }}>Tip: </span>{tip}
+        <span style={{ color: '#e07b39', fontWeight: 700 }}>Tip: </span>{tip}
       </motion.div>
     </motion.div>
   )

@@ -26,7 +26,7 @@ function Hero({ apiStatus }) {
         position: 'relative',
         borderRadius: 24,
         overflow: 'hidden',
-        background: 'linear-gradient(135deg, #4338ca 0%, #7c3aed 55%, #1d4ed8 100%)',
+        background: 'linear-gradient(135deg, #1e3160 0%, #16254a 55%, #0f1b33 100%)',
         padding: '2.75rem 2.5rem 2.5rem',
         marginBottom: '2rem',
       }}

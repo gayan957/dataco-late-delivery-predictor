@@ -36,9 +36,9 @@ export default function ModeComparison({ data, selectedMode }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.07, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
               style={{
-                background: isSel ? '#eef2ff' : '#ffffff',
-                border: isSel ? '1.5px solid #818cf8' : '1px solid #e2e8f0',
-                boxShadow: isSel ? '0 0 0 3px rgba(99,102,241,0.12)' : '0 1px 3px rgba(0,0,0,0.06)',
+                background: isSel ? '#fdf1e7' : '#ffffff',
+                border: isSel ? '1.5px solid #f0a46b' : '1px solid #e2e8f0',
+                boxShadow: isSel ? '0 0 0 3px rgba(224,123,57,0.12)' : '0 1px 3px rgba(0,0,0,0.06)',
               }}
             >
               {/* Mode icon */}
@@ -51,8 +51,8 @@ export default function ModeComparison({ data, selectedMode }) {
                 {mode}
                 {isSel && (
                   <div style={{
-                    color: '#4f46e5', fontSize: '0.57rem', marginTop: 2,
-                    background: '#eef2ff', borderRadius: 3, padding: '1px 4px',
+                    color: '#e07b39', fontSize: '0.57rem', marginTop: 2,
+                    background: '#fdf1e7', borderRadius: 3, padding: '1px 4px',
                     display: 'inline-block',
                   }}>selected</div>
                 )}

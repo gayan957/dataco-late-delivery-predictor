@@ -17,9 +17,9 @@ function Spinner() {
 }
 
 const MODE_META = {
-  'Same Day':       { icon: '⚡', color: '#0891b2', days: 0, desc: 'Same-day fulfilment' },
-  'First Class':    { icon: '🚀', color: '#4f46e5', days: 1, desc: '1-day scheduled window' },
-  'Second Class':   { icon: '📬', color: '#7c3aed', days: 2, desc: '2-day scheduled window' },
+  'Same Day':       { icon: '⚡', color: '#2a4178', days: 0, desc: 'Same-day fulfilment' },
+  'First Class':    { icon: '🚀', color: '#e07b39', days: 1, desc: '1-day scheduled window' },
+  'Second Class':   { icon: '📬', color: '#16254a', days: 2, desc: '2-day scheduled window' },
   'Standard Class': { icon: '📦', color: '#64748b', days: 4, desc: '4-day scheduled window' },
 }
 
@@ -81,8 +81,8 @@ export default function OrderForm({ onSubmit, loading }) {
         <div>
           <label className="form-label">
             Shipping Mode
-            <span style={{ color: '#6366f1', marginLeft: 6, fontWeight: 700, fontSize: '0.6rem',
-                           background: '#eef2ff', border: '1px solid #c7d2fe',
+            <span style={{ color: '#e07b39', marginLeft: 6, fontWeight: 700, fontSize: '0.6rem',
+                           background: '#fdf1e7', border: '1px solid #f5d3b8',
                            borderRadius: 4, padding: '1px 5px' }}>
               strongest predictor
             </span>

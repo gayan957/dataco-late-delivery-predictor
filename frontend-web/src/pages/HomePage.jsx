@@ -54,7 +54,7 @@ export default function HomePage() {
         <div className="org-hero-overlay" />
         <div className="org-container org-hero-content">
           <p className="org-eyebrow org-eyebrow-light">DataCo Global</p>
-          <h1 className="org-hero-title">Connecting products to customers across five continents</h1>
+          <h1 className="org-hero-title">Connecting products to customers across <span className="accent">five continents</span></h1>
           <p className="org-hero-text">
             A global supply-chain company that sources, stores and delivers everyday products to consumers and
             businesses around the world.

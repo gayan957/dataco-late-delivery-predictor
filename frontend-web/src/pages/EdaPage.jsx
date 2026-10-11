@@ -4,12 +4,12 @@ import { AnimatePresence, motion } from 'framer-motion'
 const EASE = [0.16, 1, 0.3, 1]
 
 const SECTIONS = [
-  { id: 'target',   label: 'Target',              icon: '🎯', intro: 'What we predict: the real number of shipping days (regression) and whether the order is late (classification).' },
-  { id: 'drivers',  label: 'Drivers of delay',    icon: '🚚', intro: 'Which order-time factors are related to shipping time and late delivery.' },
-  { id: 'time',     label: 'Time patterns',       icon: '🕒', intro: 'Does the day, hour, month or year of the order change shipping behaviour?' },
-  { id: 'quality',  label: 'Data quality',        icon: '🧹', intro: 'Outliers, correlations and consistency checks that shaped the cleaning decisions.' },
-  { id: 'features', label: 'Feature engineering', icon: '🧩', intro: 'How categorical features were encoded and which features carry real signal.' },
-  { id: 'models',   label: 'Model results',       icon: '🏆', intro: 'How the five tuned algorithms compared, and how the final models performed on hidden test data.' },
+  { id: 'target',   label: 'Target',              intro: 'What we predict: the real number of shipping days (regression) and whether the order is late (classification).' },
+  { id: 'drivers',  label: 'Drivers of delay',    intro: 'Which order-time factors are related to shipping time and late delivery.' },
+  { id: 'time',     label: 'Time patterns',       intro: 'Does the day, hour, month or year of the order change shipping behaviour?' },
+  { id: 'quality',  label: 'Data quality',        intro: 'Outliers, correlations and consistency checks that shaped the cleaning decisions.' },
+  { id: 'features', label: 'Feature engineering', intro: 'How categorical features were encoded and which features carry real signal.' },
+  { id: 'models',   label: 'Model results',       intro: 'How the five tuned algorithms compared, and how the final models performed on hidden test data.' },
 ]
 
 const REG = 'Regression'
@@ -137,19 +137,11 @@ const FIGURES = [
     insight: 'Test ROC-AUC 0.773 vs 0.743 for the shipping-mode baseline.' },
 ]
 
-const FUNNEL = [
-  { value: '180,519', label: 'Raw order items', sub: '53 columns · 65,752 orders' },
-  { value: '−7,754',  label: 'Cancelled / fraud removed', sub: 'never shipped' },
-  { value: '172,765', label: 'Clean rows', sub: '28 columns · 0 missing' },
-  { value: '138,098', label: 'Training set', sub: '50,318 orders' },
-  { value: '34,667',  label: 'Hidden test set', sub: '12,579 orders · 0 overlap' },
-]
-
-const LEAKS = [
-  { col: 'Late_delivery_risk',          why: '= real days > scheduled days (97.5 % of rows)' },
-  { col: 'Delivery Status',             why: 'Text version of the same comparison' },
-  { col: 'shipping date (DateOrders)',  why: 'Order date + real shipping days (97.4 %)' },
-  { col: 'Order Status',                why: 'Recorded after fulfilment' },
+const SUMMARY = [
+  { value: '180,519', label: 'Raw order items' },
+  { value: '172,765', label: 'Rows after cleaning' },
+  { value: '138,098', label: 'Training rows' },
+  { value: '34,667',  label: 'Test rows' },
 ]
 
 function FigureCard({ fig, onOpen, index }) {
@@ -164,7 +156,7 @@ function FigureCard({ fig, onOpen, index }) {
     >
       <button className="fig-image-btn" onClick={onOpen} aria-label={`Enlarge chart: ${fig.title}`}>
         <img src={`/figures/${fig.src}`} alt={fig.title} loading="lazy" />
-        <span className="fig-zoom">⤢ Enlarge</span>
+        <span className="fig-zoom">Enlarge</span>
       </button>
       <div className="fig-body">
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
@@ -172,7 +164,7 @@ function FigureCard({ fig, onOpen, index }) {
         </div>
         <h3 className="fig-title">{fig.title}</h3>
         <p className="fig-text">{fig.text}</p>
-        <div className="fig-insight"><span>💡</span><span>{fig.insight}</span></div>
+        <div className="fig-insight"><span className="fig-insight-label">Key insight</span><span>{fig.insight}</span></div>
       </div>
     </motion.article>
   )
@@ -214,13 +206,15 @@ function Lightbox({ figures, index, onClose, onMove }) {
         transition={{ duration: 0.25, ease: EASE }}
         onClick={e => e.stopPropagation()}
       >
-        <button className="lightbox-close" onClick={onClose} aria-label="Close">✕</button>
+        <button className="lightbox-close" onClick={onClose} aria-label="Close">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
+        </button>
         <img src={`/figures/${fig.src}`} alt={fig.title} />
         <div className="lightbox-caption">
           <span className={`task-tag ${fig.task === REG ? 'task-reg' : 'task-clf'}`}>{fig.task}</span>
           <h3 className="fig-title" style={{ marginTop: 8 }}>{fig.title}</h3>
           <p className="fig-text">{fig.text}</p>
-          <div className="fig-insight"><span>💡</span><span>{fig.insight}</span></div>
+          <div className="fig-insight"><span className="fig-insight-label">Key insight</span><span>{fig.insight}</span></div>
           <div className="lightbox-nav">
             <button onClick={() => onMove(-1)} aria-label="Previous chart">← Previous</button>
             <span>{index + 1} / {figures.length}</span>
@@ -234,12 +228,11 @@ function Lightbox({ figures, index, onClose, onMove }) {
 
 export default function EdaPage({ navigate }) {
   const [section, setSection] = useState('all')
-  const [task, setTask]       = useState('all')
   const [open, setOpen]       = useState(null)
 
   const visible = useMemo(() => FIGURES.filter(f =>
-    (section === 'all' || f.section === section) && (task === 'all' || f.task === task)
-  ), [section, task])
+    section === 'all' || f.section === section
+  ), [section])
 
   const move = useCallback((d) => {
     setOpen(i => (i + d + visible.length) % visible.length)
@@ -261,8 +254,8 @@ export default function EdaPage({ navigate }) {
       >
         <div className="eda-hero-circle" />
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 720 }}>
-          <div className="hero-pill hero-pill-dark">📊 Exploratory Data Analysis</div>
-          <h1 className="eda-hero-title">What drives late deliveries?</h1>
+          <div className="eda-hero-eyebrow">Exploratory Data Analysis</div>
+          <h1 className="eda-hero-title">What drives <span className="accent">late</span> deliveries?</h1>
           <p className="eda-hero-sub">
             Charts and findings from the project's EDA notebooks, all computed on the <strong>training set only</strong>, followed by
             the feature-engineering experiments and the final model results. Click any chart to enlarge it.
@@ -270,75 +263,36 @@ export default function EdaPage({ navigate }) {
         </div>
       </motion.section>
 
-      {/* Pipeline funnel */}
-      <section className="funnel">
-        {FUNNEL.map((f, i) => (
-          <motion.div
-            key={f.label}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 + i * 0.07, ease: EASE }}
-            className="card funnel-step"
-          >
-            <div className="funnel-value" style={{ color: f.value.startsWith('−') ? '#dc2626' : '#4338ca' }}>{f.value}</div>
-            <div className="funnel-label">{f.label}</div>
-            <div className="funnel-sub">{f.sub}</div>
-          </motion.div>
+      {/* Data summary */}
+      <section className="card eda-summary">
+        {SUMMARY.map(item => (
+          <div key={item.label} className="eda-summary-item">
+            <div className="eda-summary-value">{item.value}</div>
+            <div className="eda-summary-label">{item.label}</div>
+          </div>
         ))}
-      </section>
-
-      {/* Leakage panel */}
-      <section className="card leak-panel">
-        <div>
-          <div className="eyebrow" style={{ textAlign: 'left' }}>Leakage control</div>
-          <h2 style={{ margin: '0.2rem 0 0.4rem', fontSize: '1.15rem', fontWeight: 800 }}>Columns that would give away the answer</h2>
-          <p className="fig-text" style={{ margin: 0 }}>
-            The model runs at checkout, so anything recorded after shipping is forbidden. Each column was proven to leak, then removed.
-          </p>
-        </div>
-        <div className="leak-list">
-          {LEAKS.map(l => (
-            <div key={l.col} className="leak-item">
-              <code>{l.col}</code>
-              <span>{l.why}</span>
-            </div>
-          ))}
-        </div>
       </section>
 
       {/* Filters */}
       <div className="eda-filters">
         <div className="filter-row" role="tablist" aria-label="Section">
-          <button className={`filter-chip ${section === 'all' ? 'filter-chip-active' : ''}`} onClick={() => setSection('all')}>All sections</button>
+          <button className={`filter-chip ${section === 'all' ? 'filter-chip-active' : ''}`} onClick={() => setSection('all')}>All</button>
           {SECTIONS.map(s => (
             <button
               key={s.id}
               className={`filter-chip ${section === s.id ? 'filter-chip-active' : ''}`}
               onClick={() => setSection(s.id)}
             >
-              <span>{s.icon}</span> {s.label}
-            </button>
-          ))}
-        </div>
-        <div className="segmented" role="tablist" aria-label="Task">
-          {['all', REG, CLF].map(t => (
-            <button key={t} className={task === t ? 'segmented-active' : ''} onClick={() => setTask(t)}>
-              {t === 'all' ? 'Both tasks' : t}
+              {s.label}
             </button>
           ))}
         </div>
       </div>
 
       {/* Sections */}
-      {groups.length === 0 && (
-        <div className="card" style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
-          No charts for this combination – try “Both tasks”.
-        </div>
-      )}
       {groups.map(g => (
         <section key={g.id} className="eda-section">
           <div className="eda-section-head">
-            <span className="eda-section-icon">{g.icon}</span>
             <div>
               <h2 className="eda-section-title">{g.label}</h2>
               <p className="fig-text" style={{ margin: 0 }}>{g.intro}</p>

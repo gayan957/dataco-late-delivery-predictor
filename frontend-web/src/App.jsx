@@ -1,16 +1,18 @@
 import { useState, useEffect, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import NavBar, { NAV_ITEMS } from './components/NavBar'
+import NavBar, { PAGE_LINKS } from './components/NavBar'
 import Footer from './components/Footer'
 import HomePage from './pages/HomePage'
 import EdaPage from './pages/EdaPage'
 import PredictionPage from './pages/PredictionPage'
+import CustomerPage from './pages/CustomerPage'
 import { checkHealth } from './api'
 
 const PAGES = {
   '/':        HomePage,
   '/eda':     EdaPage,
-  '/predict': PredictionPage,
+  '/predict':  PredictionPage,
+  '/customer': CustomerPage,
 }
 
 // Hash routing (#/eda) keeps the app a static SPA with no router dependency.
@@ -34,7 +36,7 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    const item = NAV_ITEMS.find(i => i.path === route)
+    const item = PAGE_LINKS.find(i => i.path === route)
     document.title = `${item?.label ?? 'Home'} · DataCo Delivery Predictor`
     window.scrollTo({ top: 0, behavior: 'instant' })
   }, [route])

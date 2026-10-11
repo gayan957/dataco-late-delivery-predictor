@@ -8,8 +8,8 @@ export default function Header({ apiStatus }) {
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="mb-6"
       style={{
-        background: 'linear-gradient(135deg, rgba(99,102,241,0.11) 0%, rgba(139,92,246,0.07) 50%, rgba(6,182,212,0.05) 100%)',
-        border: '1px solid rgba(99,102,241,0.18)',
+        background: 'linear-gradient(135deg, rgba(224,123,57,0.11) 0%, rgba(224,123,57,0.07) 50%, rgba(30,49,96,0.05) 100%)',
+        border: '1px solid rgba(224,123,57,0.18)',
         borderRadius: 20,
         padding: '1.3rem 1.8rem',
         display: 'flex',
@@ -23,18 +23,18 @@ export default function Header({ apiStatus }) {
       {/* Ambient glow */}
       <div style={{
         position: 'absolute', top: '-50%', left: '-5%', width: '35%', height: '200%',
-        background: 'radial-gradient(ellipse, rgba(99,102,241,0.09) 0%, transparent 70%)',
+        background: 'radial-gradient(ellipse, rgba(224,123,57,0.09) 0%, transparent 70%)',
         pointerEvents: 'none',
       }} />
 
       {/* Icon */}
       <div style={{
         width: 52, height: 52, flexShrink: 0,
-        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+        background: 'linear-gradient(135deg, #e07b39, #c9672a)',
         borderRadius: 14,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: '1.55rem',
-        boxShadow: '0 8px 24px rgba(99,102,241,0.45)',
+        boxShadow: '0 8px 24px rgba(224,123,57,0.45)',
       }}>📦</div>
 
       {/* Title */}
@@ -42,7 +42,7 @@ export default function Header({ apiStatus }) {
         <h1 style={{
           fontSize: '1.52rem', fontWeight: 900, margin: '0 0 4px',
           lineHeight: 1.1, letterSpacing: '-0.025em',
-          background: 'linear-gradient(135deg, #e2e8f0 0%, #a5b4fc 55%, #67e8f9 100%)',
+          background: 'linear-gradient(135deg, #e2e8f0 0%, #f0b98f 55%, #f0a46b 100%)',
           WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
         }}>DataCo Delivery Predictor</h1>
@@ -55,11 +55,11 @@ export default function Header({ apiStatus }) {
       {/* Model badge */}
       <div style={{
         flexShrink: 0,
-        background: 'rgba(99,102,241,0.1)',
-        border: '1px solid rgba(99,102,241,0.22)',
+        background: 'rgba(224,123,57,0.1)',
+        border: '1px solid rgba(224,123,57,0.22)',
         borderRadius: 12, padding: '0.6rem 1rem', textAlign: 'right',
       }}>
-        <div style={{ fontSize: '0.6rem', color: '#818cf8', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 2 }}>
+        <div style={{ fontSize: '0.6rem', color: '#f0a46b', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 2 }}>
           Active Model
         </div>
         <div style={{ fontSize: '0.88rem', color: '#e2e8f0', fontWeight: 700, lineHeight: 1.2 }}>

@@ -3,16 +3,16 @@ import { SHIPPING_INFO } from '../data'
 
 const CLF_METRICS = [
   { label: 'ROC-AUC',   value: '0.773', sub: 'Area under ROC curve',  color: '#15803d', bg: '#f0fdf4', bd: '#bbf7d0' },
-  { label: 'Precision', value: '89.4%', sub: 'Of predicted-late, correct', color: '#0891b2', bg: '#ecfeff', bd: '#a5f3fc' },
+  { label: 'Precision', value: '89.4%', sub: 'Of predicted-late, correct', color: '#2a4178', bg: '#eef2f8', bd: '#cfd8ea' },
   { label: 'Recall',    value: '59.2%', sub: 'Late orders caught',    color: '#d97706', bg: '#fffbeb', bd: '#fde68a' },
-  { label: 'F1 Score',  value: '0.712', sub: 'Precision × recall',   color: '#7c3aed', bg: '#f5f3ff', bd: '#ddd6fe' },
+  { label: 'F1 Score',  value: '0.712', sub: 'Precision × recall',   color: '#16254a', bg: '#eef2f8', bd: '#cfd8ea' },
 ]
 
 const REG_METRICS = [
-  { label: 'MAE',          value: '0.96d',  sub: 'Mean absolute error',  color: '#4f46e5', bg: '#eef2ff', bd: '#c7d2fe' },
-  { label: 'R²',           value: '0.39',   sub: 'Variance explained',   color: '#0891b2', bg: '#ecfeff', bd: '#a5f3fc' },
+  { label: 'MAE',          value: '0.96d',  sub: 'Mean absolute error',  color: '#e07b39', bg: '#fdf1e7', bd: '#f5d3b8' },
+  { label: 'R²',           value: '0.39',   sub: 'Variance explained',   color: '#2a4178', bg: '#eef2f8', bd: '#cfd8ea' },
   { label: 'Within 1 day', value: '52.3%',  sub: 'Accurate to ±1 day',  color: '#15803d', bg: '#f0fdf4', bd: '#bbf7d0' },
-  { label: 'Dataset',      value: '180K',   sub: 'Orders for training',  color: '#7c3aed', bg: '#f5f3ff', bd: '#ddd6fe' },
+  { label: 'Dataset',      value: '180K',   sub: 'Orders for training',  color: '#16254a', bg: '#eef2f8', bd: '#cfd8ea' },
 ]
 
 export default function ModelInfo() {
@@ -89,7 +89,7 @@ export default function ModelInfo() {
                 border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center',
                 justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0,
               }}>{info.icon}</span>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a' }}>{mode}</span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f1b33' }}>{mode}</span>
             </div>
             <div style={{ fontSize: '1.15rem', fontWeight: 900, color: info.color }}>
               {info.days} day{info.days !== 1 ? 's' : ''}
