@@ -12,7 +12,7 @@ const HERO_STATS = [
   { value: '180,519', label: 'Orders trained on' },
   { value: '54.8%',   label: 'Historical late rate' },
   { value: '5',       label: 'Models compared' },
-  { value: 'MAE 0.96d', label: 'Best accuracy score' },
+  { value: 'MAE 0.94d', label: 'Best accuracy score' },
 ]
 
 function Hero({ apiStatus }) {
@@ -55,27 +55,16 @@ function Hero({ apiStatus }) {
         <div style={{ flex: 1, minWidth: 0 }}>
           {/* Title row */}
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.2rem', marginBottom: '1rem' }}>
-            <div style={{
-              width: 58, height: 58, flexShrink: 0,
-              background: 'rgba(255,255,255,0.15)',
-              border: '1px solid rgba(255,255,255,0.22)',
-              borderRadius: 16, display: 'flex', alignItems: 'center',
-              justifyContent: 'center', fontSize: '1.8rem',
-            }}>📦</div>
-
             <div style={{ flex: 1 }}>
-              <h1 style={{
-                color: '#ffffff', fontWeight: 900, fontSize: '1.9rem',
-                margin: '0 0 5px', letterSpacing: '-0.03em', lineHeight: 1.1,
-              }}>
-                DataCo Delivery Predictor
-              </h1>
-              <p style={{
-                color: 'rgba(255,255,255,0.65)', fontWeight: 600, fontSize: '0.7rem',
-                textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0,
-              }}>
-                IT3051 · Fundamentals of Data Mining · Group Mini-Project
+              <p className="eda-hero-eyebrow" style={{ margin: '0 0 0.6rem' }}>
+                Logistics · Delivery risk analysis
               </p>
+              <h1 style={{
+                color: '#ffffff', fontWeight: 800, fontSize: '2rem',
+                margin: 0, letterSpacing: '-0.03em', lineHeight: 1.15,
+              }}>
+                Delivery <span className="accent">Risk</span> Prediction
+              </h1>
             </div>
 
             {apiStatus !== null && (
@@ -101,9 +90,8 @@ function Hero({ apiStatus }) {
             color: 'rgba(255,255,255,0.85)', fontSize: '0.95rem',
             lineHeight: 1.65, margin: '0 0 1.6rem', maxWidth: 540,
           }}>
-            Predict whether a supply chain order will arrive <strong style={{ color: '#fff' }}>late</strong> — at
-            the moment it is placed. A Decision Tree trained on real DataCo logistics data.
-            No post-delivery information used.
+            Assess each order at the moment it is placed: estimated shipping days, the probability of late
+            delivery, and how the outcome changes across shipping modes.
           </p>
 
           {/* Stats chips */}
@@ -225,7 +213,7 @@ export default function PredictionPage() {
               borderRadius: 10, fontSize: '0.8rem', color: '#92400e', fontWeight: 500,
             }}
           >
-            ⚠&nbsp; API not reachable — start it with:{' '}
+            API not reachable — start it with:{' '}
             <code style={{
               background: '#fef3c7', borderRadius: 5,
               padding: '1px 6px', fontFamily: 'monospace',

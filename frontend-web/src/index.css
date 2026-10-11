@@ -438,8 +438,35 @@
   .cust-note { margin: 0; font-size: 0.78rem; color: #94a3b8; text-align: center; }
 }
 
+@layer components {
+  /* ── Model performance tables (Logistics page) ── */
+  .perf-section-head { margin-bottom: 1rem; padding-left: 0.9rem; border-left: 3px solid #e07b39; }
+  .perf-section-title { margin: 0 0 2px; font-size: 1.25rem; font-weight: 800; color: #0f1b33; letter-spacing: -0.02em; }
+  .perf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .perf-card { padding: 0; overflow: hidden; }
+  .perf-head { padding: 1.1rem 1.25rem 0.9rem; border-bottom: 1px solid #e2e8f0; }
+  .perf-title { margin: 0; font-size: 1rem; font-weight: 700; color: #0f1b33; }
+  .perf-sub { margin: 2px 0 0; font-size: 0.8rem; color: #64748b; }
+  .table-wrap { overflow-x: auto; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; font-variant-numeric: tabular-nums; }
+  .data-table th {
+    text-align: left; padding: 0.65rem 1.25rem; background: #f4f6fa; color: #475569;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .data-table td { padding: 0.7rem 1.25rem; border-bottom: 1px solid #eef2f7; color: #1e293b; vertical-align: middle; }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+  .data-table tbody tr:hover td { background: #fffaf5; }
+  .data-table .num { text-align: right; white-space: nowrap; }
+  .data-table .metric { font-weight: 600; color: #0f1b33; white-space: nowrap; }
+  .data-table .strong { font-weight: 700; color: #0f1b33; }
+  .data-table .muted { color: #64748b; }
+  .data-table th.num { text-align: right; }
+}
+
 /* ═══════════════════════════ Responsive ═══════════════════════════ */
 @media (max-width: 1100px) {
+  .perf-grid { grid-template-columns: 1fr; }
   .org-services { grid-template-columns: repeat(2, 1fr); }
   .org-about { gap: 2.5rem; }
   .pred-hero-media { display: none !important; }
@@ -463,6 +490,8 @@
 }
 
 @media (max-width: 600px) {
+  .data-table .hide-sm { display: none; }
+  .data-table th, .data-table td { padding-left: 0.9rem; padding-right: 0.9rem; }
   .org-container { padding: 0 1rem; }
   .org-services { grid-template-columns: 1fr; }
   .org-hero { min-height: 520px; background-position: 30% center; }

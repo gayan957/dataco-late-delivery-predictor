@@ -10,10 +10,10 @@ export const SEGMENTS        = ['Consumer', 'Corporate', 'Home Office']
 export const MARKETS         = ['Africa', 'Europe', 'LATAM', 'Pacific Asia', 'USCA']
 
 export const SHIPPING_INFO = {
-  'Same Day':       { days: 0, icon: '⚡', desc: 'Same-day delivery',      color: '#e07b39' },
-  'First Class':    { days: 1, icon: '🚀', desc: 'Next-day delivery',        color: '#e07b39' },
-  'Second Class':   { days: 2, icon: '📬', desc: '2-day standard delivery',  color: '#c9672a' },
-  'Standard Class': { days: 4, icon: '📦', desc: '4-day economy delivery',   color: '#64748b' },
+  'Same Day':       { days: 0, desc: 'Same-day delivery',      color: '#e07b39' },
+  'First Class':    { days: 1, desc: 'Next-day delivery',        color: '#e07b39' },
+  'Second Class':   { days: 2, desc: '2-day standard delivery',  color: '#c9672a' },
+  'Standard Class': { days: 4, desc: '4-day economy delivery',   color: '#64748b' },
 }
 
 export const LATE_TIPS = {

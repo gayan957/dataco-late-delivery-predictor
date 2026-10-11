@@ -41,9 +41,6 @@ export default function ModeComparison({ data, selectedMode }) {
                 boxShadow: isSel ? '0 0 0 3px rgba(224,123,57,0.12)' : '0 1px 3px rgba(0,0,0,0.06)',
               }}
             >
-              {/* Mode icon */}
-              <div style={{ fontSize: '1.5rem', marginBottom: 5 }}>{info.icon}</div>
-
               <div style={{
                 fontSize: '0.63rem', fontWeight: 800, color: '#334155',
                 textTransform: 'uppercase', letterSpacing: '0.08em', lineHeight: 1.3, marginBottom: 8,

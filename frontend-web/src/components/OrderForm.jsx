@@ -17,10 +17,10 @@ function Spinner() {
 }
 
 const MODE_META = {
-  'Same Day':       { icon: '⚡', color: '#2a4178', days: 0, desc: 'Same-day fulfilment' },
-  'First Class':    { icon: '🚀', color: '#e07b39', days: 1, desc: '1-day scheduled window' },
-  'Second Class':   { icon: '📬', color: '#16254a', days: 2, desc: '2-day scheduled window' },
-  'Standard Class': { icon: '📦', color: '#64748b', days: 4, desc: '4-day scheduled window' },
+  'Same Day':       { color: '#2a4178', days: 0, desc: 'Same-day fulfilment' },
+  'First Class':    { color: '#e07b39', days: 1, desc: '1-day scheduled window' },
+  'Second Class':   { color: '#16254a', days: 2, desc: '2-day scheduled window' },
+  'Standard Class': { color: '#64748b', days: 4, desc: '4-day scheduled window' },
 }
 
 function ShippingPreview({ mode }) {
@@ -33,7 +33,6 @@ function ShippingPreview({ mode }) {
       borderRadius: 8, padding: '0.4rem 0.75rem',
       fontSize: '0.75rem', color: '#64748b',
     }}>
-      <span style={{ fontSize: '1rem' }}>{m.icon}</span>
       <span>{m.desc} —</span>
       <span style={{ color: m.color, fontWeight: 700 }}>
         {m.days === 0 ? '0 days (same day)' : `${m.days} day${m.days !== 1 ? 's' : ''} scheduled`}

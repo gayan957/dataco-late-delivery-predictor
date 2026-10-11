@@ -1,114 +1,123 @@
 import { motion } from 'framer-motion'
 import { SHIPPING_INFO } from '../data'
 
-const CLF_METRICS = [
-  { label: 'ROC-AUC',   value: '0.773', sub: 'Area under ROC curve',  color: '#15803d', bg: '#f0fdf4', bd: '#bbf7d0' },
-  { label: 'Precision', value: '89.4%', sub: 'Of predicted-late, correct', color: '#2a4178', bg: '#eef2f8', bd: '#cfd8ea' },
-  { label: 'Recall',    value: '59.2%', sub: 'Late orders caught',    color: '#d97706', bg: '#fffbeb', bd: '#fde68a' },
-  { label: 'F1 Score',  value: '0.712', sub: 'Precision × recall',   color: '#16254a', bg: '#eef2f8', bd: '#cfd8ea' },
+// Hidden test-set results (notebooks 09 / C09). Baseline = predict from shipping mode alone.
+const CLF_ROWS = [
+  { metric: 'ROC-AUC',   model: '0.773', base: '0.743', desc: 'How well late and on-time orders are separated' },
+  { metric: 'Accuracy',  model: '72.4%', base: '69.9%', desc: 'Share of all orders classified correctly' },
+  { metric: 'Precision', model: '89.4%', base: '88.8%', desc: 'Orders flagged as late that really were late' },
+  { metric: 'Recall',    model: '59.2%', base: '54.9%', desc: 'Late orders that the model caught' },
+  { metric: 'F1 score',  model: '0.712', base: '0.678', desc: 'Balance of precision and recall' },
 ]
 
-const REG_METRICS = [
-  { label: 'MAE',          value: '0.96d',  sub: 'Mean absolute error',  color: '#e07b39', bg: '#fdf1e7', bd: '#f5d3b8' },
-  { label: 'R²',           value: '0.39',   sub: 'Variance explained',   color: '#2a4178', bg: '#eef2f8', bd: '#cfd8ea' },
-  { label: 'Within 1 day', value: '52.3%',  sub: 'Accurate to ±1 day',  color: '#15803d', bg: '#f0fdf4', bd: '#bbf7d0' },
-  { label: 'Dataset',      value: '180K',   sub: 'Orders for training',  color: '#16254a', bg: '#eef2f8', bd: '#cfd8ea' },
+const REG_ROWS = [
+  { metric: 'MAE',          model: '0.94 days', base: '0.96 days', desc: 'Average error in shipping days' },
+  { metric: 'RMSE',         model: '1.25 days', base: '1.25 days', desc: 'Error that penalises large misses' },
+  { metric: 'R²',           model: '0.402',     base: '0.397',     desc: 'Share of variation in shipping time explained' },
+  { metric: 'Within ±1 day', model: '53.6%',    base: '53.6%',     desc: 'Orders predicted to within one day' },
+  { metric: 'Bias',         model: '+0.005 days', base: '+0.007 days', desc: 'Average over- or under-estimate' },
 ]
+
+// Training-set mean real shipping days and test-set late rate per mode.
+const MODE_STATS = {
+  'Same Day':       { actual: '0.5 days', late: '45.0%' },
+  'First Class':    { actual: '2.0 days', late: '100.0%' },
+  'Second Class':   { actual: '4.0 days', late: '79.8%' },
+  'Standard Class': { actual: '4.0 days', late: '40.1%' },
+}
+
+function MetricTable({ title, subtitle, rows }) {
+  return (
+    <div className="card perf-card">
+      <div className="perf-head">
+        <h3 className="perf-title">{title}</h3>
+        <p className="perf-sub">{subtitle}</p>
+      </div>
+      <div className="table-wrap">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th className="num">Final model</th>
+              <th className="num">Baseline</th>
+              <th className="hide-sm">Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(r => (
+              <tr key={r.metric}>
+                <td className="metric">{r.metric}</td>
+                <td className="num strong">{r.model}</td>
+                <td className="num muted">{r.base}</td>
+                <td className="hide-sm muted">{r.desc}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
 
 export default function ModelInfo() {
   return (
-    <div style={{ marginTop: '2rem' }}>
-      {/* Classification metrics */}
-      <div className="section-label">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-          <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
-        </svg>
-        Classifier Performance
-        <span style={{ fontWeight: 500, textTransform: 'none', letterSpacing: 0, color: '#94a3b8', fontSize: '0.7rem' }}>
-          &nbsp;— DecisionTree · threshold 0.65 · test set
-        </span>
-      </div>
-      <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.85rem', marginBottom: '1.75rem' }}>
-        {CLF_METRICS.map((m, i) => (
-          <motion.div key={m.label} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.07, duration: 0.4 }} className="card"
-            style={{ padding: '1.1rem 0.9rem', textAlign: 'center', borderTop: `3px solid ${m.color}` }}>
-            <div style={{ fontSize: '0.6rem', fontWeight: 800, color: '#94a3b8',
-                          textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>{m.label}</div>
-            <div style={{ fontSize: '1.65rem', fontWeight: 900, color: m.color, lineHeight: 1,
-                          background: m.bg, borderRadius: 10, padding: '0.3rem 0' }}>{m.value}</div>
-            <div style={{ fontSize: '0.65rem', color: '#94a3b8', marginTop: 6 }}>{m.sub}</div>
-          </motion.div>
-        ))}
+    <motion.section
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45 }}
+      style={{ marginTop: '2rem' }}
+    >
+      <div className="perf-section-head">
+        <h2 className="perf-section-title">Model performance</h2>
+        <p className="perf-sub">
+          Results on the hidden test set of unseen orders. The baseline predicts from shipping mode alone.
+        </p>
       </div>
 
-      {/* Regression metrics */}
-      <div className="section-label">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-          <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
-        </svg>
-        Regression Performance
-        <span style={{ fontWeight: 500, textTransform: 'none', letterSpacing: 0, color: '#94a3b8', fontSize: '0.7rem' }}>
-          &nbsp;— DecisionTree · predicts delivery days · test set
-        </span>
-      </div>
-      <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.85rem', marginBottom: '1.75rem' }}>
-        {REG_METRICS.map((m, i) => (
-          <motion.div key={m.label} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.07, duration: 0.4 }} className="card"
-            style={{ padding: '1.1rem 0.9rem', textAlign: 'center', borderTop: `3px solid ${m.color}` }}>
-            <div style={{ fontSize: '0.6rem', fontWeight: 800, color: '#94a3b8',
-                          textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>{m.label}</div>
-            <div style={{ fontSize: '1.65rem', fontWeight: 900, color: m.color, lineHeight: 1,
-                          background: m.bg, borderRadius: 10, padding: '0.3rem 0' }}>{m.value}</div>
-            <div style={{ fontSize: '0.65rem', color: '#94a3b8', marginTop: 6 }}>{m.sub}</div>
-          </motion.div>
-        ))}
+      <div className="perf-grid">
+        <MetricTable
+          title="Late-delivery classifier"
+          subtitle="Decision Tree · alert threshold 0.65 · 34,534 test rows"
+          rows={CLF_ROWS}
+        />
+        <MetricTable
+          title="Shipping-days regression"
+          subtitle="Decision Tree (depth 3) · 34,667 test rows"
+          rows={REG_ROWS}
+        />
       </div>
 
-      {/* Shipping schedule reference */}
-      <div className="section-label">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-          <rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h5l3 3v5h-8V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
-        </svg>
-        Shipping Schedule Reference
-      </div>
-      <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.85rem' }}>
-        {Object.entries(SHIPPING_INFO).map(([mode, info], i) => (
-          <motion.div
-            key={mode}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.07, duration: 0.4 }}
-            className="card"
-            style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: 6 }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{
-                width: 34, height: 34, borderRadius: 10, background: '#f8fafc',
-                border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0,
-              }}>{info.icon}</span>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f1b33' }}>{mode}</span>
-            </div>
-            <div style={{ fontSize: '1.15rem', fontWeight: 900, color: info.color }}>
-              {info.days} day{info.days !== 1 ? 's' : ''}
-            </div>
-            <div style={{ fontSize: '0.65rem', color: '#94a3b8' }}>{info.desc}</div>
-          </motion.div>
-        ))}
+      <div className="card perf-card" style={{ marginTop: '1.25rem' }}>
+        <div className="perf-head">
+          <h3 className="perf-title">Shipping schedule reference</h3>
+          <p className="perf-sub">Promised delivery window for each mode, compared with what actually happens.</p>
+        </div>
+        <div className="table-wrap">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Shipping mode</th>
+                <th className="num">Scheduled</th>
+                <th className="num">Average actual</th>
+                <th className="num">Late rate</th>
+                <th className="hide-sm">Service</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(SHIPPING_INFO).map(([mode, info]) => (
+                <tr key={mode}>
+                  <td className="metric">{mode}</td>
+                  <td className="num">{info.days} {info.days === 1 ? 'day' : 'days'}</td>
+                  <td className="num">{MODE_STATS[mode]?.actual}</td>
+                  <td className="num strong">{MODE_STATS[mode]?.late}</td>
+                  <td className="hide-sm muted">{info.desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Footer */}
-      <div style={{
-        marginTop: '1.5rem', paddingTop: '1.1rem',
-        borderTop: '1px solid #e2e8f0',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        fontSize: '0.7rem', color: '#94a3b8',
-      }}>
-        <span>IT3051 · Fundamentals of Data Mining · Group Mini-Project</span>
-        <span>DecisionTree (depth=3, min_samples_leaf=50) · scikit-learn · DataCo Supply Chain</span>
-      </div>
-    </div>
+    </motion.section>
   )
 }

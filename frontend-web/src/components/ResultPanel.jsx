@@ -181,8 +181,12 @@ function Placeholder() {
         style={{
           width: 72, height: 72, borderRadius: 20, marginBottom: '1.25rem',
           background: '#fdf1e7', border: '1px solid #f5d3b8',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem',
-        }}>📊</motion.div>
+          display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#e07b39',
+        }}>
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 20V10M10 20V4M16 20v-6M22 20H2" />
+        </svg>
+      </motion.div>
       <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
         Awaiting Prediction
       </div>
@@ -194,7 +198,7 @@ function Placeholder() {
         {[
           ['Classifier · ROC-AUC 0.77', '#15803d', '#f0fdf4', '#bbf7d0'],
           ['Precision 89.4%',           '#16254a', '#eef2f8', '#cfd8ea'],
-          ['Regression · MAE 0.96d',    '#e07b39', '#fdf1e7', '#f5d3b8'],
+          ['Regression · MAE 0.94d',    '#e07b39', '#fdf1e7', '#f5d3b8'],
         ].map(([t, c, bg, br]) => (
           <span key={t} style={{
             background: bg, border: `1px solid ${br}`,
@@ -237,7 +241,11 @@ function ErrorState({ message }) {
       }}>
       <div style={{ width: 56, height: 56, borderRadius: 16, background: '#fef2f2',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '1.75rem', marginBottom: '1rem' }}>⚡</div>
+                    color: '#dc2626', marginBottom: '1rem' }}>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" />
+        </svg>
+      </div>
       <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#dc2626', marginBottom: 8 }}>
         API Unreachable
       </div>
