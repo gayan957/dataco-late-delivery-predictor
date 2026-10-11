@@ -14,3 +14,4 @@ build/
 *.log
 data/*.csv
 data/**/*.csv
+node_modules/

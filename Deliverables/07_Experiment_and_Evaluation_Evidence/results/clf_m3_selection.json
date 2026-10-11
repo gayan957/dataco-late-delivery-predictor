@@ -1,0 +1,62 @@
+{
+  "task": "classification",
+  "target": "Late_delivery_risk",
+  "features": [
+    "Shipping Mode",
+    "Market",
+    "Order Country",
+    "Category Name",
+    "Order Item Quantity",
+    "Customer Segment",
+    "order_weekday",
+    "order_month",
+    "order_hour",
+    "order_quarter",
+    "is_weekend"
+  ],
+  "category_column": "Category Name",
+  "date_features": [
+    "order_weekday",
+    "order_month",
+    "order_hour",
+    "order_quarter",
+    "is_weekend"
+  ],
+  "not_used": [
+    "Days for shipping (real)",
+    "Days for shipment (scheduled)",
+    "Delivery Status",
+    "shipping date (DateOrders)",
+    "Order Status",
+    "Late_delivery_risk"
+  ],
+  "low_card_max": 30,
+  "plan": {
+    "numeric": [
+      "Order Item Quantity",
+      "order_weekday",
+      "order_month",
+      "order_hour",
+      "order_quarter",
+      "is_weekend"
+    ],
+    "onehot": [
+      "Shipping Mode",
+      "Market",
+      "Customer Segment"
+    ],
+    "onehot_rare": [],
+    "target": [
+      "Order Country",
+      "Category Name"
+    ],
+    "dropped": [],
+    "high_card_strategy": "target"
+  },
+  "cv": "StratifiedGroupKFold(5) grouped by Order Id",
+  "n_model_columns": 20,
+  "cv_roc_auc_final_features": {
+    "Logistic": 0.745,
+    "HistGB": 0.772
+  }
+}

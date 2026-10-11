@@ -16,7 +16,7 @@ export default function ModeComparison({ data, selectedMode }) {
         Shipping Mode Comparison
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.85rem' }}>
+      <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.85rem' }}>
         {MODE_ORDER.map((mode, i) => {
           const r      = map[mode]
           if (!r) return null

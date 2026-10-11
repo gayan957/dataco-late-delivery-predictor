@@ -1,0 +1,48 @@
+{
+  "task": "classification",
+  "target": "Late_delivery_risk",
+  "features": [
+    "Shipping Mode",
+    "Market",
+    "Order Country",
+    "Category Name",
+    "Order Item Quantity",
+    "Customer Segment",
+    "order_weekday",
+    "order_month",
+    "order_hour",
+    "order_quarter",
+    "is_weekend"
+  ],
+  "validation": "StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=42), grouped by Order Id, stratified on the label",
+  "metrics": [
+    "roc_auc",
+    "accuracy",
+    "precision",
+    "recall",
+    "f1"
+  ],
+  "primary_metric": "roc_auc",
+  "business_priority": "recall",
+  "outlier_treatment": "none",
+  "scaler_by_model_family": {
+    "linear (Logistic Regression)": {
+      "scaler": "standard",
+      "cv_roc_auc": 0.745
+    },
+    "distance (KNN)": {
+      "scaler": "standard",
+      "cv_roc_auc": 0.7442
+    },
+    "tree (Decision Tree / Random Forest / XGBoost)": {
+      "scaler": "none",
+      "cv_roc_auc": 0.772
+    }
+  },
+  "reference_cv_roc_auc": {
+    "Baseline: always 'late'": 0.5,
+    "Baseline: Shipping Mode only": 0.7414,
+    "Team features: Logistic": 0.745,
+    "Team features: HistGB (default)": 0.772
+  }
+}

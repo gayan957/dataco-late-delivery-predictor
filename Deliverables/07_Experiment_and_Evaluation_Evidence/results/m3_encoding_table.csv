@@ -1,0 +1,12 @@
+,different_values,encoding,model_columns
+Shipping Mode,4,one-hot,4
+Market,5,one-hot,5
+Order Country,161,target encoding,1
+Category Name,50,target encoding,1
+Order Item Quantity,5,number (as is),1
+Customer Segment,3,one-hot,3
+order_weekday,7,number (as is),1
+order_month,12,number (as is),1
+order_hour,24,number (as is),1
+order_quarter,4,number (as is),1
+is_weekend,2,number (as is),1

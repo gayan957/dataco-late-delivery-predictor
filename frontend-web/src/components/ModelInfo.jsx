@@ -28,7 +28,7 @@ export default function ModelInfo() {
           &nbsp;— DecisionTree · threshold 0.65 · test set
         </span>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.85rem', marginBottom: '1.75rem' }}>
+      <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.85rem', marginBottom: '1.75rem' }}>
         {CLF_METRICS.map((m, i) => (
           <motion.div key={m.label} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.07, duration: 0.4 }} className="card"
@@ -52,7 +52,7 @@ export default function ModelInfo() {
           &nbsp;— DecisionTree · predicts delivery days · test set
         </span>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.85rem', marginBottom: '1.75rem' }}>
+      <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.85rem', marginBottom: '1.75rem' }}>
         {REG_METRICS.map((m, i) => (
           <motion.div key={m.label} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.07, duration: 0.4 }} className="card"
@@ -73,7 +73,7 @@ export default function ModelInfo() {
         </svg>
         Shipping Schedule Reference
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.85rem' }}>
+      <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.85rem' }}>
         {Object.entries(SHIPPING_INFO).map(([mode, info], i) => (
           <motion.div
             key={mode}

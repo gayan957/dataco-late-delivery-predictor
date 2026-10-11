@@ -1,0 +1,166 @@
+{
+  "task": "classification",
+  "target": "Late_delivery_risk",
+  "group": "Order Id",
+  "seed": 42,
+  "split": "StratifiedGroupKFold(n_splits=5) on the label, fold 0 = test",
+  "excluded_order_status": [
+    "CANCELED",
+    "SUSPECTED_FRAUD"
+  ],
+  "dropped_columns": [
+    {
+      "column": "Days for shipping (real)",
+      "reason": "Leakage: real shipping days decide the label"
+    },
+    {
+      "column": "Days for shipment (scheduled)",
+      "reason": "Part of the label's definition (late = real > scheduled); fixed by Shipping Mode"
+    },
+    {
+      "column": "Delivery Status",
+      "reason": "Leakage: the label in words"
+    },
+    {
+      "column": "shipping date (DateOrders)",
+      "reason": "Leakage: order date + real shipping days"
+    },
+    {
+      "column": "Order Status",
+      "reason": "Leakage: recorded after fulfilment (used only to filter)"
+    },
+    {
+      "column": "Customer Email",
+      "reason": "Masked (all 'XXXXXXXXX'), no information"
+    },
+    {
+      "column": "Customer Password",
+      "reason": "Masked (all 'XXXXXXXXX'), no information"
+    },
+    {
+      "column": "Customer Fname",
+      "reason": "Personal data (PII)"
+    },
+    {
+      "column": "Customer Lname",
+      "reason": "Personal data (PII)"
+    },
+    {
+      "column": "Customer Street",
+      "reason": "Personal data (PII)"
+    },
+    {
+      "column": "Customer Zipcode",
+      "reason": "Personal data (PII)"
+    },
+    {
+      "column": "Order Zipcode",
+      "reason": "86.3% missing"
+    },
+    {
+      "column": "Product Description",
+      "reason": "100.0% missing"
+    },
+    {
+      "column": "Product Status",
+      "reason": "Constant: a single value in every row"
+    },
+    {
+      "column": "Product Image",
+      "reason": "Image URL: one per product, duplicates Product Name"
+    },
+    {
+      "column": "Order Profit Per Order",
+      "reason": "Exact duplicate of 'Benefit per order'"
+    },
+    {
+      "column": "Order Item Total",
+      "reason": "Exact duplicate of 'Sales per customer'"
+    },
+    {
+      "column": "Product Category Id",
+      "reason": "Exact duplicate of 'Category Id'"
+    },
+    {
+      "column": "Order Customer Id",
+      "reason": "Exact duplicate of 'Customer Id'"
+    },
+    {
+      "column": "Order Item Cardprod Id",
+      "reason": "Exact duplicate of 'Product Card Id'"
+    },
+    {
+      "column": "Order Item Product Price",
+      "reason": "Exact duplicate of 'Product Price'"
+    },
+    {
+      "column": "Department Id",
+      "reason": "1-to-1 with 'Department Name' (same information as a code)"
+    },
+    {
+      "column": "Product Card Id",
+      "reason": "1-to-1 with 'Product Name' (same information as a code)"
+    },
+    {
+      "column": "Order Item Id",
+      "reason": "Row identifier"
+    },
+    {
+      "column": "Customer Id",
+      "reason": "Identifier: would let the model memorise customers"
+    }
+  ],
+  "remaining_columns": [
+    "Type",
+    "Benefit per order",
+    "Sales per customer",
+    "Late_delivery_risk",
+    "Category Id",
+    "Category Name",
+    "Customer City",
+    "Customer Country",
+    "Customer Segment",
+    "Customer State",
+    "Department Name",
+    "Latitude",
+    "Longitude",
+    "Market",
+    "Order City",
+    "Order Country",
+    "order date (DateOrders)",
+    "Order Id",
+    "Order Item Discount",
+    "Order Item Discount Rate",
+    "Order Item Profit Ratio",
+    "Order Item Quantity",
+    "Sales",
+    "Order Region",
+    "Order State",
+    "Product Name",
+    "Product Price",
+    "Shipping Mode"
+  ],
+  "summary": [
+    {
+      "set": "full",
+      "rows": 172765,
+      "orders": 62897,
+      "share_of_rows_%": 100.0,
+      "late_%": 57.29
+    },
+    {
+      "set": "train",
+      "rows": 138231,
+      "orders": 50318,
+      "share_of_rows_%": 80.0,
+      "late_%": 57.18
+    },
+    {
+      "set": "test",
+      "rows": 34534,
+      "orders": 12579,
+      "share_of_rows_%": 20.0,
+      "late_%": 57.73
+    }
+  ]
+}

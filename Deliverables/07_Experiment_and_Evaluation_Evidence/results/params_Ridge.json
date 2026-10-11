@@ -1,0 +1,19 @@
+{
+  "model": "Ridge",
+  "owner": "M1",
+  "scaler": "minmax",
+  "best_params": {
+    "alpha": 157.41890047456639
+  },
+  "cv_MAE_default": 0.9959,
+  "cv_MAE_tuned": 0.9933,
+  "cv_MAE_std": 0.0088,
+  "cv_scores_tuned": {
+    "MAE": 0.9933,
+    "RMSE": 1.2712,
+    "R2": 0.3886,
+    "MedAE": 0.9937,
+    "within_1_day_%": 51.983,
+    "bias": 0.0001
+  }
+}
